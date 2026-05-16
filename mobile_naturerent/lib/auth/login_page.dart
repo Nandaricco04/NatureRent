@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:bcrypt/bcrypt.dart';
 import '../user/user_main_page.dart';
-import '../owner/owner_home_page.dart';
+import '../owner/owner_main_page.dart';
 import 'register_user_page.dart';
 import 'register_owner_page.dart';
 
@@ -92,8 +92,10 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
 
-      final status =
-          (owner['status_verifikasi'] ?? '').toString().trim().toLowerCase();
+      final status = (owner['status_verifikasi'] ?? '')
+          .toString()
+          .trim()
+          .toLowerCase();
 
       if (status != 'approved') {
         _show('Akun pemilik rental belum disetujui');
@@ -102,7 +104,7 @@ class _LoginPageState extends State<LoginPage> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const OwnerHomePage()),
+        MaterialPageRoute(builder: (_) => OwnerMainPage(userId: userId)),
       );
     } else {
       _show('Role akun tidak valid');
@@ -110,9 +112,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _show(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg)),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
   @override

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class OwnerHomePage extends StatelessWidget {
-  const OwnerHomePage({super.key});
+class OwnerLaporanPage extends StatelessWidget {
+  const OwnerLaporanPage({super.key});
 
   static const _green = Color(0xFF297B2D);
   static const _text = Color(0xFF212121);
@@ -15,10 +15,10 @@ class OwnerHomePage extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.dashboard_outlined, size: 52, color: _green),
+            const Icon(Icons.insert_chart_outlined, size: 52, color: _green),
             const SizedBox(height: 14),
             Text(
-              'Home',
+              'Laporan',
               style: GoogleFonts.poppins(
                 color: _text,
                 fontSize: 24,
@@ -27,7 +27,7 @@ class OwnerHomePage extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              'Ringkasan toko rental akan tampil di sini.',
+              'Ringkasan pendapatan dan performa toko.',
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
                 color: const Color(0xFF6D6A66),
