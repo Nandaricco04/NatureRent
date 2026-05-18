@@ -45,7 +45,9 @@ class _OwnerTambahAlatPageState extends State<OwnerTambahAlatPage> {
 
   Future<void> _loadCategories() async {
     try {
-      final data = await supabase.from('categories').select('id_category, name');
+      final data = await supabase
+          .from('categories')
+          .select('id_category, name');
       if (!mounted) return;
       setState(() {
         _categories = List<Map<String, dynamic>>.from(data);
@@ -89,7 +91,9 @@ class _OwnerTambahAlatPageState extends State<OwnerTambahAlatPage> {
           '${widget.ownerId}/${DateTime.now().millisecondsSinceEpoch}_${file.name}';
       final contentType = ext == 'png' ? 'image/png' : 'image/jpeg';
 
-      await supabase.storage.from('product-images').uploadBinary(
+      await supabase.storage
+          .from('product-images')
+          .uploadBinary(
             path,
             bytes,
             fileOptions: FileOptions(contentType: contentType),
@@ -155,9 +159,9 @@ class _OwnerTambahAlatPageState extends State<OwnerTambahAlatPage> {
   }
 
   void _show(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
