@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../auth/login_page.dart';
 import 'user_edit_profile_page.dart';
+import 'syarat_kebijakan_page.dart';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({
@@ -185,7 +186,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     icon: Icons.info_outline,
                     title: 'Syarat & Kebijakan Privasi',
                     subtitle: 'Ketentuan penggunaan',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                        builder: (_) => const SyaratKebijakanPage(),
+                        ),
+                      );
+                    },
                   ),
                   _ProfileMenuItem(
                     icon: Icons.help_outline,

@@ -7,6 +7,8 @@ import 'owner_home_page.dart';
 import 'owner_laporan_page.dart';
 import 'owner_pesanan_page.dart';
 
+import 'owner_edit_profile_page.dart';
+
 class OwnerMainPage extends StatefulWidget {
   const OwnerMainPage({super.key, required this.userId});
 
@@ -63,6 +65,24 @@ class _OwnerMainPageState extends State<OwnerMainPage> {
     }
   }
 
+  // Dipanggil setelah kembali dari halaman edit profil
+  // agar data terbaru langsung tampil
+  Future<void> _openEditProfile() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => UserEditTokoProfilePage(
+          userId: widget.userId,
+          name: _storeName,
+          email: _email,
+        ),
+      ),
+    );
+
+    // Reload profil setelah kembali dari halaman edit
+    _loadStoreProfile();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,6 +99,7 @@ class _OwnerMainPageState extends State<OwnerMainPage> {
               email: _email,
               photoUrl: _photoUrl,
               onTabSelected: (index) => setState(() => _selectedIndex = index),
+              onEditProfile: _openEditProfile, // ← disambungkan di sini
             ),
             Expanded(
               child: IndexedStack(
@@ -107,6 +128,7 @@ class _Header extends StatelessWidget {
     required this.email,
     required this.photoUrl,
     required this.onTabSelected,
+    required this.onEditProfile, // ← parameter baru
   });
 
   final int selectedIndex;
@@ -116,6 +138,7 @@ class _Header extends StatelessWidget {
   final String email;
   final String? photoUrl;
   final ValueChanged<int> onTabSelected;
+  final VoidCallback onEditProfile; // ← parameter baru
 
   static const _green = Color(0xFF297B2D);
   static const _background = Color(0xFFF5F2ED);
@@ -154,6 +177,7 @@ class _Header extends StatelessWidget {
             storeName: storeName,
             email: email,
             photoUrl: photoUrl,
+            onEditProfile: onEditProfile, // ← diteruskan ke _StoreCard
           ),
         ),
         Padding(
@@ -209,12 +233,14 @@ class _StoreCard extends StatelessWidget {
     required this.storeName,
     required this.email,
     required this.photoUrl,
+    required this.onEditProfile, // ← parameter baru
   });
 
   final bool loading;
   final String storeName;
   final String email;
   final String? photoUrl;
+  final VoidCallback onEditProfile; // ← parameter baru
 
   static const _green = Color(0xFF297B2D);
   static const _text = Color(0xFF212121);
@@ -293,7 +319,7 @@ class _StoreCard extends StatelessWidget {
             width: 90,
             height: 26,
             child: OutlinedButton(
-              onPressed: () {},
+              onPressed: onEditProfile, // ← sebelumnya () {} sekarang terhubung
               style: OutlinedButton.styleFrom(
                 foregroundColor: _text,
                 side: const BorderSide(color: _green),
