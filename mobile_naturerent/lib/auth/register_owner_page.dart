@@ -40,6 +40,18 @@ class _RegisterOwnerPageState extends State<RegisterOwnerPage> {
   List<Map<String, dynamic>> _lokasiList = [];
   int? _lokasiId;
 
+  static const _bankOptions = [
+    'BCA',
+    'BRI',
+    'Mandiri',
+    'BNI',
+    'BSI',
+    'CIMB Niaga',
+    'Danamon',
+    'Permata',
+    'BTN',
+  ];
+
   final Map<String, _UploadState> _uploads = {
     'profil': _UploadState(),
     'ktp': _UploadState(),
@@ -108,7 +120,9 @@ class _RegisterOwnerPageState extends State<RegisterOwnerPage> {
         contentType = 'image/png';
       }
 
-      await supabase.storage.from('owner-docs').uploadBinary(
+      await supabase.storage
+          .from('owner-docs')
+          .uploadBinary(
             path,
             bytes,
             fileOptions: FileOptions(contentType: contentType),
@@ -253,9 +267,7 @@ class _RegisterOwnerPageState extends State<RegisterOwnerPage> {
   }
 
   void _show(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg)),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
   bool _isNameValid(String value) {
@@ -337,11 +349,14 @@ class _RegisterOwnerPageState extends State<RegisterOwnerPage> {
               ),
               const SizedBox(height: 24),
 
-              Text('Detail toko',
-                  style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF297B2D))),
+              Text(
+                'Detail toko',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF297B2D),
+                ),
+              ),
               const SizedBox(height: 12),
 
               _field('Nama Toko', _namaTokoC, hint: 'Masukkan nama toko'),
@@ -365,7 +380,10 @@ class _RegisterOwnerPageState extends State<RegisterOwnerPage> {
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<int>(
                     value: _lokasiId,
-                    hint: Text('Pilih kota', style: GoogleFonts.poppins(fontSize: 13)),
+                    hint: Text(
+                      'Pilih kota',
+                      style: GoogleFonts.poppins(fontSize: 13),
+                    ),
                     isExpanded: true,
                     items: _lokasiList.map((e) {
                       return DropdownMenuItem<int>(
@@ -386,7 +404,10 @@ class _RegisterOwnerPageState extends State<RegisterOwnerPage> {
               _field('Alamat', _alamatC, hint: 'Masukkan alamat toko'),
 
               const SizedBox(height: 12),
-              Text('Foto Profil Toko', style: GoogleFonts.poppins(fontSize: 13)),
+              Text(
+                'Foto Profil Toko',
+                style: GoogleFonts.poppins(fontSize: 13),
+              ),
               const SizedBox(height: 8),
               _uploadField(
                 label: 'Upload Foto Profil',
@@ -395,11 +416,14 @@ class _RegisterOwnerPageState extends State<RegisterOwnerPage> {
               ),
 
               const SizedBox(height: 24),
-              Text('Verifikasi Dokumen',
-                  style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                      color: const Color(0xFF297B2D))),
+              Text(
+                'Verifikasi Dokumen',
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  color: const Color(0xFF297B2D),
+                ),
+              ),
               const SizedBox(height: 12),
 
               Text('Foto KTP', style: GoogleFonts.poppins(fontSize: 13)),
@@ -420,7 +444,10 @@ class _RegisterOwnerPageState extends State<RegisterOwnerPage> {
               ),
 
               const SizedBox(height: 12),
-              Text('Foto Tempat Usaha', style: GoogleFonts.poppins(fontSize: 13)),
+              Text(
+                'Foto Tempat Usaha',
+                style: GoogleFonts.poppins(fontSize: 13),
+              ),
               const SizedBox(height: 8),
               _uploadField(
                 label: 'Upload Foto Tempat Usaha',
@@ -429,14 +456,17 @@ class _RegisterOwnerPageState extends State<RegisterOwnerPage> {
               ),
 
               const SizedBox(height: 24),
-              Text('Detail Keuangan',
-                  style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF297B2D))),
+              Text(
+                'Detail Keuangan',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF297B2D),
+                ),
+              ),
               const SizedBox(height: 12),
 
-              _field('Pilih Bank', _bankC, hint: 'Masukkan nama bank'),
+              _bankDropdown(),
               _field(
                 'Nomor Rekening',
                 _rekC,
@@ -445,11 +475,14 @@ class _RegisterOwnerPageState extends State<RegisterOwnerPage> {
               ),
 
               const SizedBox(height: 24),
-              Text('Akun Rental',
-                  style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                      color: const Color(0xFF297B2D))),
+              Text(
+                'Akun Rental',
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  color: const Color(0xFF297B2D),
+                ),
+              ),
               const SizedBox(height: 12),
 
               _field(
@@ -562,6 +595,58 @@ class _RegisterOwnerPageState extends State<RegisterOwnerPage> {
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Color(0xFFE2E2E2)),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _bankDropdown() {
+    final currentValue = _bankOptions.contains(_bankC.text)
+        ? _bankC.text
+        : null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 16),
+        Text('Pilih Bank', style: GoogleFonts.poppins(fontSize: 13)),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          initialValue: currentValue,
+          isExpanded: true,
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: Color(0xFF7A7A7A),
+          ),
+          items: _bankOptions.map((bank) {
+            return DropdownMenuItem<String>(
+              value: bank,
+              child: Text(bank, style: GoogleFonts.poppins(fontSize: 13)),
+            );
+          }).toList(),
+          onChanged: (value) => setState(() => _bankC.text = value ?? ''),
+          decoration: InputDecoration(
+            hintText: 'Pilih Bank',
+            hintStyle: GoogleFonts.poppins(fontSize: 13),
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 14,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFE2E2E2)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFE2E2E2)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFF297B2D)),
             ),
           ),
         ),
