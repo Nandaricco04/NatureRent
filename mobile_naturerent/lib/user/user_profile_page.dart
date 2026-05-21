@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../auth/login_page.dart';
 import 'user_edit_profile_page.dart';
 import 'syarat_kebijakan_page.dart';
+import 'user_bantuan_dukungan_page.dart';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({
@@ -199,7 +200,18 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     icon: Icons.help_outline,
                     title: 'Bantuan & Dukungan',
                     subtitle: 'FAQ & hubungi kami',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => UserBantuanDukunganPage(
+                            userId: widget.userId,
+                            name: profileName,
+                            email: profileEmail,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
