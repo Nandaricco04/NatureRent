@@ -35,6 +35,7 @@ class _UserEditProfilePageState extends State<UserEditProfilePage> {
   bool _uploadingPhoto = false;
   int? _lokasiId;
   String? _profilePhotoUrl;
+  String? _oldProfilePhotoUrl;
   List<Map<String, dynamic>> _lokasiList = [];
 
   static const _green = Color(0xFF297B2D);
@@ -68,6 +69,7 @@ class _UserEditProfilePageState extends State<UserEditProfilePage> {
           _provinceC.text = (profile['provinsi'] ?? '').toString();
           _profilePhotoUrl = (profile['profile_photo_url'] ?? '').toString();
           if (_profilePhotoUrl!.isEmpty) _profilePhotoUrl = null;
+          _oldProfilePhotoUrl = _profilePhotoUrl;
           _lokasiId = profile['lokasi_id'] as int?;
         }
         _loading = false;
@@ -99,12 +101,15 @@ class _UserEditProfilePageState extends State<UserEditProfilePage> {
 
       final url = await _profileService.pickAndUploadPhoto(
         userId: widget.userId,
-        oldPhotoUrl: _profilePhotoUrl,
       );
       if (url == null) return;
 
+      final previousPhotoUrl = _profilePhotoUrl;
       if (!mounted) return;
       setState(() => _profilePhotoUrl = url);
+      if (previousPhotoUrl != null && previousPhotoUrl != _oldProfilePhotoUrl) {
+        await _profileService.removePhoto(previousPhotoUrl);
+      }
       _show('Foto profil berhasil dipilih');
     } catch (e) {
       _show('Upload foto gagal: $e');
@@ -159,6 +164,12 @@ class _UserEditProfilePageState extends State<UserEditProfilePage> {
           photoUrl: _profilePhotoUrl,
         ),
       );
+
+      if (_oldProfilePhotoUrl != null &&
+          _oldProfilePhotoUrl != _profilePhotoUrl) {
+        await _profileService.removePhoto(_oldProfilePhotoUrl);
+        _oldProfilePhotoUrl = _profilePhotoUrl;
+      }
 
       if (!mounted) return;
       _show('Profil berhasil disimpan');

@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class SyaratKebijakanPage extends StatefulWidget {
-  const SyaratKebijakanPage({super.key});
+class UserSyaratKebijakanPage extends StatefulWidget {
+  const UserSyaratKebijakanPage({super.key});
 
   @override
-  State<SyaratKebijakanPage> createState() => _SyaratKebijakanPageState();
+  State<UserSyaratKebijakanPage> createState() =>
+      _UserSyaratKebijakanPageState();
 }
 
-class _SyaratKebijakanPageState extends State<SyaratKebijakanPage> {
+class _UserSyaratKebijakanPageState extends State<UserSyaratKebijakanPage> {
   final supabase = Supabase.instance.client;
 
   bool _loading = true;

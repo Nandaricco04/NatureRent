@@ -86,7 +86,6 @@ class UserProfileService {
 
   Future<String?> pickAndUploadPhoto({
     required dynamic userId,
-    required String? oldPhotoUrl,
   }) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -103,7 +102,8 @@ class UserProfileService {
     }
 
     final ext = (file.extension ?? '').toLowerCase();
-    final path = '$userId/${DateTime.now().millisecondsSinceEpoch}_${file.name}';
+    final path =
+        'profile/user_${userId}_${DateTime.now().millisecondsSinceEpoch}_${file.name}';
     final contentType = ext == 'png' ? 'image/png' : 'image/jpeg';
 
     await _supabase.storage.from(_photoBucket).uploadBinary(
@@ -112,9 +112,7 @@ class UserProfileService {
           fileOptions: FileOptions(contentType: contentType),
         );
 
-    final url = _supabase.storage.from(_photoBucket).getPublicUrl(path);
-    await _removeOldPhoto(oldPhotoUrl);
-    return url;
+    return _supabase.storage.from(_photoBucket).getPublicUrl(path);
   }
 
   Future<void> saveProfile({
@@ -148,13 +146,17 @@ class UserProfileService {
     return File(file.path!).readAsBytes();
   }
 
-  Future<void> _removeOldPhoto(String? oldPhotoUrl) async {
-    if (oldPhotoUrl == null) return;
+  Future<void> removePhoto(String? oldPhotoUrl) async {
+    try {
+      if (oldPhotoUrl == null) return;
 
-    final oldPath = _extractPathFromPublicUrl(oldPhotoUrl);
-    if (oldPath == null) return;
+      final oldPath = _extractPathFromPublicUrl(oldPhotoUrl);
+      if (oldPath == null) return;
 
-    await _supabase.storage.from(_photoBucket).remove([oldPath]);
+      await _supabase.storage.from(_photoBucket).remove([oldPath]);
+    } catch (_) {
+      return;
+    }
   }
 
   String? _extractPathFromPublicUrl(String url) {

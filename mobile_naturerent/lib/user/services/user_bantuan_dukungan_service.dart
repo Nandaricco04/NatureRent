@@ -76,7 +76,8 @@ class UserBantuanDukunganService {
 
     final bytes = await picked.readAsBytes();
     final cleanName = picked.name.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
-    final path = '$userId/${DateTime.now().millisecondsSinceEpoch}_$cleanName';
+    final path =
+        'foto_komplain/user_${userId}_${DateTime.now().millisecondsSinceEpoch}_$cleanName';
 
     await _supabase.storage.from('support_image').uploadBinary(path, bytes);
 

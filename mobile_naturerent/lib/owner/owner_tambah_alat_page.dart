@@ -1,9 +1,6 @@
-import 'dart:io';
-import 'dart:typed_data';
-
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'widgets/owner_alat_form_widgets.dart';
@@ -19,6 +16,7 @@ class OwnerTambahAlatPage extends StatefulWidget {
 
 class _OwnerTambahAlatPageState extends State<OwnerTambahAlatPage> {
   final supabase = Supabase.instance.client;
+  final _imagePicker = ImagePicker();
 
   final _nameC = TextEditingController();
   final _priceC = TextEditingController();
@@ -51,9 +49,6 @@ class _OwnerTambahAlatPageState extends State<OwnerTambahAlatPage> {
       if (!mounted) return;
       setState(() {
         _categories = List<Map<String, dynamic>>.from(data);
-        if (_categories.isNotEmpty) {
-          _categoryId = _categories.first['id_category'] as int;
-        }
         _loading = false;
       });
     } catch (e) {
@@ -63,32 +58,71 @@ class _OwnerTambahAlatPageState extends State<OwnerTambahAlatPage> {
     }
   }
 
-  Future<void> _pickAndUploadImage() async {
+  Future<void> _showImageSourcePicker() async {
+    if (_uploadingImage) return;
+
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.photo_camera_outlined),
+                  title: Text(
+                    'Ambil dari Kamera',
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                  ),
+                  onTap: () => Navigator.pop(context, ImageSource.camera),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.photo_library_outlined),
+                  title: Text(
+                    'Pilih dari Galeri',
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                  ),
+                  onTap: () => Navigator.pop(context, ImageSource.gallery),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (source == null) return;
+    await _pickAndUploadImage(source);
+  }
+
+  Future<void> _pickAndUploadImage(ImageSource source) async {
     try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['jpg', 'jpeg', 'png'],
-        withData: true,
+      final picked = await _imagePicker.pickImage(
+        source: source,
+        imageQuality: 80,
+        maxWidth: 1600,
       );
 
-      if (result == null || result.files.isEmpty) return;
+      if (picked == null) return;
       setState(() => _uploadingImage = true);
 
-      final file = result.files.first;
-      final bytes = await _readFileBytes(file);
-      if (bytes == null) {
-        _show('Gagal membaca foto');
-        return;
-      }
+      final bytes = await picked.readAsBytes();
 
-      if (file.size > 5 * 1024 * 1024) {
+      if (bytes.length > 5 * 1024 * 1024) {
         _show('Ukuran foto maksimal 5 MB');
         return;
       }
 
-      final ext = (file.extension ?? '').toLowerCase();
+      final cleanName = picked.name.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
+      final ext = cleanName.split('.').last.toLowerCase();
       final path =
-          '${widget.ownerId}/${DateTime.now().millisecondsSinceEpoch}_${file.name}';
+          'products/${widget.ownerId}/${DateTime.now().millisecondsSinceEpoch}_$cleanName';
       final contentType = ext == 'png' ? 'image/png' : 'image/jpeg';
 
       await supabase.storage
@@ -101,7 +135,9 @@ class _OwnerTambahAlatPageState extends State<OwnerTambahAlatPage> {
 
       final url = supabase.storage.from('product-images').getPublicUrl(path);
       if (!mounted) return;
+      final previousImageUrl = _imageUrl;
       setState(() => _imageUrl = url);
+      await _removeProductImage(previousImageUrl);
       _show('Foto alat berhasil diupload');
     } catch (e) {
       _show('Upload foto gagal: $e');
@@ -110,10 +146,28 @@ class _OwnerTambahAlatPageState extends State<OwnerTambahAlatPage> {
     }
   }
 
-  Future<Uint8List?> _readFileBytes(PlatformFile file) async {
-    if (file.bytes != null) return file.bytes;
-    if (file.path == null) return null;
-    return File(file.path!).readAsBytes();
+  Future<void> _removeProductImage(String? imageUrl) async {
+    try {
+      if (imageUrl == null) return;
+
+      final path = _extractPathFromPublicUrl(imageUrl);
+      if (path == null) return;
+
+      await supabase.storage.from('product-images').remove([path]);
+    } catch (_) {
+      return;
+    }
+  }
+
+  String? _extractPathFromPublicUrl(String url) {
+    try {
+      final segments = Uri.parse(url).pathSegments;
+      final bucketIndex = segments.indexOf('product-images');
+      if (bucketIndex == -1) return null;
+      return segments.sublist(bucketIndex + 1).join('/');
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<void> _saveProduct() async {
@@ -193,7 +247,7 @@ class _OwnerTambahAlatPageState extends State<OwnerTambahAlatPage> {
       submitText: 'Simpan Alat',
       editMode: false,
       onBack: () => Navigator.pop(context),
-      onImagePick: _pickAndUploadImage,
+      onImagePick: _showImageSourcePicker,
       onCategoryChanged: (value) => setState(() => _categoryId = value),
       onSubmit: _saveProduct,
     );
@@ -312,7 +366,7 @@ class ProductFormScaffold extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 18),
-                    _label('Kapasitas/Ukuran'),
+                    _label('Kapasitas'),
                     _field(capacityC, 'Tuliskan kapasitas'),
                     const SizedBox(height: 18),
                     _label('Deskripsi'),
@@ -433,6 +487,13 @@ class ProductFormScaffold extends StatelessWidget {
   Widget _categoryDropdown() {
     return DropdownButtonFormField<int>(
       value: categoryId,
+      hint: Text(
+        'Pilih Kategori',
+        style: GoogleFonts.poppins(
+          color: const Color(0xFF9E9E9E),
+          fontSize: 14,
+        ),
+      ),
       items: categories.map((category) {
         return DropdownMenuItem<int>(
           value: category['id_category'] as int,

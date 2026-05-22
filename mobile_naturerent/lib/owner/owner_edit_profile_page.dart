@@ -38,6 +38,7 @@ class _UserEditTokoProfilePageState extends State<UserEditTokoProfilePage> {
   bool _obscurePassword = true;
   int? _lokasiId;
   String? _fotoProfil;
+  String? _oldFotoProfil;
   List<Map<String, dynamic>> _lokasiList = [];
 
   static const _bankOptions = [
@@ -77,6 +78,7 @@ class _UserEditTokoProfilePageState extends State<UserEditTokoProfilePage> {
         _nomorRekeningC.text = data.nomorRekening;
         _lokasiId = data.lokasiId;
         _fotoProfil = data.fotoProfil;
+        _oldFotoProfil = data.fotoProfil;
         _lokasiList = data.lokasiList;
         _loading = false;
       });
@@ -96,7 +98,11 @@ class _UserEditTokoProfilePageState extends State<UserEditTokoProfilePage> {
       );
 
       if (url == null || !mounted) return;
+      final previousPhotoUrl = _fotoProfil;
       setState(() => _fotoProfil = url);
+      if (previousPhotoUrl != null && previousPhotoUrl != _oldFotoProfil) {
+        await _profileService.removePhoto(previousPhotoUrl);
+      }
       _show('Foto profil berhasil diperbarui');
     } catch (e) {
       _show('Upload foto gagal: $e');
@@ -143,6 +149,11 @@ class _UserEditTokoProfilePageState extends State<UserEditTokoProfilePage> {
       final password = _passwordC.text.trim();
       if (password.isNotEmpty) {
         await _profileService.updatePassword(password);
+      }
+
+      if (_oldFotoProfil != null && _oldFotoProfil != _fotoProfil) {
+        await _profileService.removePhoto(_oldFotoProfil);
+        _oldFotoProfil = _fotoProfil;
       }
 
       if (!mounted) return;

@@ -146,7 +146,31 @@ class OwnerProfileService {
         .eq('user_id', userId);
   }
 
+  Future<void> removePhoto(String? photoUrl) async {
+    try {
+      if (photoUrl == null) return;
+
+      final path = _extractPathFromPublicUrl(photoUrl);
+      if (path == null) return;
+
+      await _supabase.storage.from(_ownerDocsBucket).remove([path]);
+    } catch (_) {
+      return;
+    }
+  }
+
   Future<void> updatePassword(String password) async {
     await _supabase.auth.updateUser(UserAttributes(password: password));
+  }
+
+  String? _extractPathFromPublicUrl(String url) {
+    try {
+      final segments = Uri.parse(url).pathSegments;
+      final bucketIndex = segments.indexOf(_ownerDocsBucket);
+      if (bucketIndex == -1) return null;
+      return segments.sublist(bucketIndex + 1).join('/');
+    } catch (_) {
+      return null;
+    }
   }
 }
