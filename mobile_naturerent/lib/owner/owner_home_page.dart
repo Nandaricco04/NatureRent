@@ -103,7 +103,7 @@ class _OwnerHomePageState extends State<OwnerHomePage> {
               const SizedBox(height: 12),
               GridView.count(
                 crossAxisCount: 2,
-                childAspectRatio: 1.58,
+                childAspectRatio: 1.42,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
                 padding: EdgeInsets.zero,
