@@ -106,6 +106,7 @@ class _OwnerHomePageState extends State<OwnerHomePage> {
                 childAspectRatio: 1.58,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
+                padding: EdgeInsets.zero,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 children: [

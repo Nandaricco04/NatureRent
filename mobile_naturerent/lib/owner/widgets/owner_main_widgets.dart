@@ -137,7 +137,7 @@ class OwnerStoreCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 104,
+      height: 110,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -208,7 +208,9 @@ class OwnerStoreCard extends StatelessWidget {
                             child: OutlinedButton(
                               onPressed: onEditProfile,
                               style: OutlinedButton.styleFrom(
-                                minimumSize: const Size(0, 36),
+                                minimumSize: const Size(0, 38),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                visualDensity: VisualDensity.compact,
                                 backgroundColor: const Color(0xFFEAF6EC),
                                 foregroundColor: _green,
                                 side: const BorderSide(color: _green),
@@ -246,7 +248,9 @@ class OwnerStoreCard extends StatelessWidget {
                             child: OutlinedButton(
                               onPressed: onLogout,
                               style: OutlinedButton.styleFrom(
-                                minimumSize: const Size(0, 36),
+                                minimumSize: const Size(0, 38),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                visualDensity: VisualDensity.compact,
                                 backgroundColor: const Color(0xFFFFEFEF),
                                 foregroundColor: Colors.red,
                                 side: const BorderSide(color: Colors.red),
