@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../auth/login_page.dart';
+import '../auth/session_manager.dart';
 import 'user_edit_profile_page.dart';
 import 'user_syarat_kebijakan_page.dart';
 import 'user_bantuan_dukungan_page.dart';
@@ -191,7 +192,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                        builder: (_) => const UserSyaratKebijakanPage(),
+                          builder: (_) => const UserSyaratKebijakanPage(),
                         ),
                       );
                     },
@@ -217,10 +218,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
               ),
               const SizedBox(height: 16),
               _LogoutTile(
-                onTap: () {
-                  Navigator.pushReplacement(
+                onTap: () async {
+                  await SessionManager.clearSession();
+                  if (!context.mounted) return;
+
+                  Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(builder: (_) => const LoginPage()),
+                    (route) => false,
                   );
                 },
               ),
@@ -256,15 +261,11 @@ class _ProfileHeader extends StatelessWidget {
               height: 76,
               color: const Color(0xFFE9F3EA),
               child: photoUrl == null
-                  ? const Icon(
-                      Icons.person,
-                      size: 44,
-                      color: Color(0xFF297B2D),
-                    )
+                  ? const Icon(Icons.person, size: 44, color: Color(0xFF297B2D))
                   : Image.network(
                       photoUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) {
+                      errorBuilder: (_, _, _) {
                         return const Icon(
                           Icons.person,
                           size: 44,
@@ -410,11 +411,7 @@ class _ProfileMenuItem extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(
-              Icons.chevron_right,
-              color: Color(0xFFC9C3BC),
-              size: 24,
-            ),
+            const Icon(Icons.chevron_right, color: Color(0xFFC9C3BC), size: 24),
           ],
         ),
       ),
@@ -445,11 +442,7 @@ class _LogoutTile extends StatelessWidget {
                   color: Color(0xFFFFECEC),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.logout,
-                  color: Colors.red,
-                  size: 23,
-                ),
+                child: const Icon(Icons.logout, color: Colors.red, size: 23),
               ),
               const SizedBox(width: 14),
               const Text(
@@ -473,11 +466,7 @@ BoxDecoration _cardDecoration() {
     color: Colors.white,
     borderRadius: BorderRadius.circular(14),
     boxShadow: const [
-      BoxShadow(
-        color: Color(0x1A000000),
-        blurRadius: 8,
-        offset: Offset(0, 2),
-      ),
+      BoxShadow(color: Color(0x1A000000), blurRadius: 8, offset: Offset(0, 2)),
     ],
   );
 }

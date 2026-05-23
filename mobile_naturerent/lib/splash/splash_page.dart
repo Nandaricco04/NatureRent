@@ -1,9 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../auth/login_page.dart';
+import '../auth/session_manager.dart';
+import '../owner/owner_main_page.dart';
+import '../user/user_main_page.dart';
 
-class SplashPage extends StatelessWidget {
+class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
+
+  @override
+  State<SplashPage> createState() => _SplashPageState();
+}
+
+class _SplashPageState extends State<SplashPage> {
+  bool _checkingSession = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _restoreSession();
+  }
+
+  Future<void> _restoreSession() async {
+    final session = await SessionManager.loadSession();
+
+    if (!mounted) return;
+
+    if (session == null) {
+      setState(() => _checkingSession = false);
+      return;
+    }
+
+    Widget page;
+    if (session.isUser) {
+      page = UserMainPage(
+        userId: session.userId,
+        name: session.name,
+        email: session.email,
+      );
+    } else if (session.isOwner) {
+      page = OwnerMainPage(userId: session.userId);
+    } else {
+      await SessionManager.clearSession();
+      if (!mounted) return;
+      setState(() => _checkingSession = false);
+      return;
+    }
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => page),
+      (route) => false,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,12 +135,16 @@ class SplashPage extends StatelessWidget {
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const LoginPage()),
-                        );
-                      },
+                      onPressed: _checkingSession
+                          ? null
+                          : () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const LoginPage(),
+                                ),
+                              );
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: const Color(0xFF297B2D),
@@ -101,7 +154,7 @@ class SplashPage extends StatelessWidget {
                         elevation: 0,
                       ),
                       child: Text(
-                        'Get Started',
+                        _checkingSession ? 'Memeriksa login...' : 'Get Started',
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,

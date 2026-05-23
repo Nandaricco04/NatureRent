@@ -6,6 +6,7 @@ import '../user/user_main_page.dart';
 import '../owner/owner_main_page.dart';
 import 'register_user_page.dart';
 import 'register_owner_page.dart';
+import 'session_manager.dart';
 
 enum LoginRole { user, owner }
 
@@ -90,7 +91,16 @@ class _LoginPageState extends State<LoginPage> {
     if (!mounted) return;
 
     if (role == 'user') {
-      Navigator.pushReplacement(
+      await SessionManager.saveSession(
+        userId: userId,
+        role: role,
+        name: data['nama']?.toString(),
+        email: data['email']?.toString(),
+      );
+
+      if (!mounted) return;
+
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
           builder: (_) => UserMainPage(
@@ -99,6 +109,7 @@ class _LoginPageState extends State<LoginPage> {
             email: data['email']?.toString(),
           ),
         ),
+        (route) => false,
       );
     } else if (role == 'pemilikrental' || role == 'owner') {
       final owner = await supabase
@@ -124,9 +135,19 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
 
-      Navigator.pushReplacement(
+      await SessionManager.saveSession(
+        userId: userId,
+        role: 'owner',
+        name: data['nama']?.toString(),
+        email: data['email']?.toString(),
+      );
+
+      if (!mounted) return;
+
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => OwnerMainPage(userId: userId)),
+        (route) => false,
       );
     } else {
       _show('Role akun tidak valid');
@@ -220,8 +241,8 @@ class _LoginHeader extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Colors.black.withOpacity(0.12),
-                  Colors.black.withOpacity(0.04),
+                  Colors.black.withValues(alpha: 0.12),
+                  Colors.black.withValues(alpha: 0.04),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -374,9 +395,9 @@ class _LoginForm extends StatelessWidget {
             onPressed: onLogin,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF287D2D),
-              disabledBackgroundColor: const Color(0xFF287D2D).withOpacity(
-                0.65,
-              ),
+              disabledBackgroundColor: const Color(
+                0xFF287D2D,
+              ).withValues(alpha: 0.65),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),

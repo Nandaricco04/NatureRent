@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../auth/login_page.dart';
+import '../auth/session_manager.dart';
 import 'owner_alat_page.dart';
+import 'owner_edit_profile_page.dart';
 import 'owner_home_page.dart';
 import 'owner_laporan_page.dart';
 import 'owner_pesanan_page.dart';
-
-import 'owner_edit_profile_page.dart';
+import 'services/owner_main_service.dart';
+import 'widgets/owner_main_widgets.dart';
 
 class OwnerMainPage extends StatefulWidget {
   const OwnerMainPage({super.key, required this.userId});
@@ -19,7 +20,7 @@ class OwnerMainPage extends StatefulWidget {
 }
 
 class _OwnerMainPageState extends State<OwnerMainPage> {
-  final supabase = Supabase.instance.client;
+  final _mainService = OwnerMainService();
 
   int _selectedIndex = 0;
   bool _loadingProfile = true;
@@ -39,25 +40,13 @@ class _OwnerMainPageState extends State<OwnerMainPage> {
 
   Future<void> _loadStoreProfile() async {
     try {
-      final user = await supabase
-          .from('users')
-          .select('email')
-          .eq('id_user', widget.userId)
-          .maybeSingle();
-
-      final owner = await supabase
-          .from('owner')
-          .select('id_owner, nama_toko, foto_profil')
-          .eq('user_id', widget.userId)
-          .maybeSingle();
-
+      final profile = await _mainService.fetchStoreProfile(widget.userId);
       if (!mounted) return;
       setState(() {
-        _email = (user?['email'] ?? _email).toString();
-        _ownerId = owner?['id_owner'];
-        _storeName = (owner?['nama_toko'] ?? _storeName).toString();
-        final photo = (owner?['foto_profil'] ?? '').toString();
-        _photoUrl = photo.isEmpty ? null : photo;
+        _email = profile.email;
+        _ownerId = profile.ownerId;
+        _storeName = profile.storeName;
+        _photoUrl = profile.photoUrl;
         _loadingProfile = false;
       });
     } catch (_) {
@@ -65,8 +54,6 @@ class _OwnerMainPageState extends State<OwnerMainPage> {
     }
   }
 
-  // Dipanggil setelah kembali dari halaman edit profil
-  // agar data terbaru langsung tampil
   Future<void> _openEditProfile() async {
     await Navigator.push(
       context,
@@ -79,8 +66,18 @@ class _OwnerMainPageState extends State<OwnerMainPage> {
       ),
     );
 
-    // Reload profil setelah kembali dari halaman edit
     _loadStoreProfile();
+  }
+
+  Future<void> _logout() async {
+    await SessionManager.clearSession();
+    if (!mounted) return;
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+      (route) => false,
+    );
   }
 
   @override
@@ -91,7 +88,7 @@ class _OwnerMainPageState extends State<OwnerMainPage> {
         top: false,
         child: Column(
           children: [
-            _Header(
+            OwnerDashboardHeader(
               selectedIndex: _selectedIndex,
               tabs: _tabs,
               loadingProfile: _loadingProfile,
@@ -99,245 +96,22 @@ class _OwnerMainPageState extends State<OwnerMainPage> {
               email: _email,
               photoUrl: _photoUrl,
               onTabSelected: (index) => setState(() => _selectedIndex = index),
-              onEditProfile: _openEditProfile, // ← disambungkan di sini
+              onEditProfile: _openEditProfile,
+              onLogout: _logout,
             ),
             Expanded(
               child: IndexedStack(
                 index: _selectedIndex,
                 children: [
-                  const OwnerHomePage(),
+                  OwnerHomePage(ownerId: _ownerId),
                   const OwnerPesananPage(),
                   OwnerAlatPage(ownerId: _ownerId),
-                  const OwnerLaporanPage(),
+                  OwnerLaporanPage(ownerId: _ownerId),
                 ],
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _Header extends StatelessWidget {
-  const _Header({
-    required this.selectedIndex,
-    required this.tabs,
-    required this.loadingProfile,
-    required this.storeName,
-    required this.email,
-    required this.photoUrl,
-    required this.onTabSelected,
-    required this.onEditProfile, // ← parameter baru
-  });
-
-  final int selectedIndex;
-  final List<String> tabs;
-  final bool loadingProfile;
-  final String storeName;
-  final String email;
-  final String? photoUrl;
-  final ValueChanged<int> onTabSelected;
-  final VoidCallback onEditProfile; // ← parameter baru
-
-  static const _green = Color(0xFF297B2D);
-  static const _background = Color(0xFFF5F2ED);
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          height: 170,
-          width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(16, 66, 16, 0),
-          decoration: const BoxDecoration(
-            color: _green,
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(28),
-              bottomRight: Radius.circular(28),
-            ),
-          ),
-          child: Text(
-            'Dashboard Toko',
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-        Positioned(
-          left: 16,
-          right: 16,
-          top: 125,
-          child: _StoreCard(
-            loading: loadingProfile,
-            storeName: storeName,
-            email: email,
-            photoUrl: photoUrl,
-            onEditProfile: onEditProfile, // ← diteruskan ke _StoreCard
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 222),
-          child: Container(
-            color: _background,
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: List.generate(tabs.length, (index) {
-                  final selected = selectedIndex == index;
-                  return Padding(
-                    padding: EdgeInsets.only(
-                      right: index == tabs.length - 1 ? 0 : 10,
-                    ),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(20),
-                      onTap: () => onTabSelected(index),
-                      child: Container(
-                        height: 34,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: selected ? _green : Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: _green),
-                        ),
-                        child: Text(
-                          tabs[index],
-                          style: GoogleFonts.poppins(
-                            color: selected ? Colors.white : _green,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _StoreCard extends StatelessWidget {
-  const _StoreCard({
-    required this.loading,
-    required this.storeName,
-    required this.email,
-    required this.photoUrl,
-    required this.onEditProfile, // ← parameter baru
-  });
-
-  final bool loading;
-  final String storeName;
-  final String email;
-  final String? photoUrl;
-  final VoidCallback onEditProfile; // ← parameter baru
-
-  static const _green = Color(0xFF297B2D);
-  static const _text = Color(0xFF212121);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 76,
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x1A000000),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          ClipOval(
-            child: Container(
-              width: 56,
-              height: 56,
-              color: const Color(0xFFE9F3EA),
-              child: photoUrl == null
-                  ? const Icon(Icons.storefront, color: _green, size: 30)
-                  : Image.network(
-                      photoUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) {
-                        return const Icon(
-                          Icons.storefront,
-                          color: _green,
-                          size: 30,
-                        );
-                      },
-                    ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: loading
-                ? const LinearProgressIndicator(color: _green)
-                : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        storeName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.poppins(
-                          color: _text,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      Text(
-                        email,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.poppins(
-                          color: const Color(0xFF6D6A66),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 90,
-            height: 26,
-            child: OutlinedButton(
-              onPressed: onEditProfile, // ← sebelumnya () {} sekarang terhubung
-              style: OutlinedButton.styleFrom(
-                foregroundColor: _text,
-                side: const BorderSide(color: _green),
-                padding: EdgeInsets.zero,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(3),
-                ),
-              ),
-              child: Text(
-                'Edit Profile',
-                style: GoogleFonts.poppins(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
