@@ -143,12 +143,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     subtitle: 'Pesanan, pembayaran, & pengembalian',
                     onTap: () {},
                   ),
-                  _ProfileMenuItem(
-                    icon: Icons.shield_outlined,
-                    title: 'Konfirmasi Pengembalian',
-                    subtitle: 'Proses pengembalian alat',
-                    onTap: () {},
-                  ),
                 ],
               ),
               const SizedBox(height: 14),
