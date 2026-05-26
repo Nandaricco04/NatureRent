@@ -6,6 +6,7 @@ import '../auth/session_manager.dart';
 import 'user_edit_profile_page.dart';
 import 'user_syarat_kebijakan_page.dart';
 import 'user_bantuan_dukungan_page.dart';
+import 'user_keamanan_akun_page.dart';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({
@@ -170,7 +171,15 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     icon: Icons.lock_outline,
                     title: 'Keamanan Akun',
                     subtitle: 'Password & verifikasi',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              UserKeamananAkunPage(userId: widget.userId),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
