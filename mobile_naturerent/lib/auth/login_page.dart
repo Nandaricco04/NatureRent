@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -22,9 +24,23 @@ class _LoginPageState extends State<LoginPage> {
   final _passC = TextEditingController();
   bool _obscure = true;
   bool _loading = false;
+  bool _googleLoading = false;
+  bool _handlingOAuthSession = false;
   LoginRole _selectedRole = LoginRole.user;
+  StreamSubscription<AuthState>? _authSubscription;
 
   final supabase = Supabase.instance.client;
+  static const _googleRedirectTo = 'naturerent://login-callback/';
+
+  @override
+  void initState() {
+    super.initState();
+    _authSubscription = supabase.auth.onAuthStateChange.listen((data) {
+      if (data.event == AuthChangeEvent.signedIn && data.session != null) {
+        _handleGoogleSession();
+      }
+    });
+  }
 
   Future<void> _login() async {
     final email = _emailC.text.trim().toLowerCase();
@@ -74,6 +90,95 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> _loginWithGoogle() async {
+    setState(() => _googleLoading = true);
+
+    try {
+      final launched = await supabase.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: _googleRedirectTo,
+      );
+
+      if (!launched) {
+        _show('Gagal membuka login Google');
+      }
+    } catch (e) {
+      _show('Login Google gagal: $e');
+    } finally {
+      if (mounted) setState(() => _googleLoading = false);
+    }
+  }
+
+  Future<void> _handleGoogleSession() async {
+    if (_handlingOAuthSession) return;
+
+    final authUser = supabase.auth.currentUser;
+    final email = authUser?.email?.trim().toLowerCase();
+
+    if (authUser == null || email == null || email.isEmpty) return;
+
+    _handlingOAuthSession = true;
+    if (mounted) setState(() => _googleLoading = true);
+
+    try {
+      var data = await supabase
+          .from('users')
+          .select('id_user, nama, email, password, role')
+          .eq('email', email)
+          .maybeSingle();
+
+      if (data == null) {
+        if (_selectedRole == LoginRole.owner) {
+          await supabase.auth.signOut();
+          _show('Akun pemilik rental harus daftar lewat form pemilik rental');
+          return;
+        }
+
+        final name = _googleDisplayName(authUser, email);
+        data = await supabase
+            .from('users')
+            .insert({
+              'nama': name,
+              'email': email,
+              'password': BCrypt.hashpw(
+                '${authUser.id}:${DateTime.now().microsecondsSinceEpoch}',
+                BCrypt.gensalt(),
+              ),
+              'role': 'user',
+            })
+            .select('id_user, nama, email, password, role')
+            .single();
+      }
+
+      if (!_isSelectedRoleValid(data['role'])) {
+        await supabase.auth.signOut();
+        _show(
+          _selectedRole == LoginRole.user
+              ? 'Akun Google ini bukan akun penyewa'
+              : 'Akun Google ini bukan akun pemilik rental',
+        );
+        return;
+      }
+
+      await _navigateByRole(data, clearSupabaseAuthSession: true);
+    } catch (e) {
+      _show('Login Google gagal: $e');
+    } finally {
+      _handlingOAuthSession = false;
+      if (mounted) setState(() => _googleLoading = false);
+    }
+  }
+
+  String _googleDisplayName(User authUser, String email) {
+    final metadata = authUser.userMetadata ?? const <String, dynamic>{};
+    final name = (metadata['full_name'] ?? metadata['name'] ?? '')
+        .toString()
+        .trim();
+
+    if (name.isNotEmpty) return name;
+    return email.split('@').first;
+  }
+
   bool _isSelectedRoleValid(dynamic roleValue) {
     final role = (roleValue ?? '').toString().trim().toLowerCase();
 
@@ -84,7 +189,10 @@ class _LoginPageState extends State<LoginPage> {
     return role == 'pemilikrental' || role == 'owner';
   }
 
-  Future<void> _navigateByRole(Map<String, dynamic> data) async {
+  Future<void> _navigateByRole(
+    Map<String, dynamic> data, {
+    bool clearSupabaseAuthSession = false,
+  }) async {
     final role = (data['role'] ?? '').toString().trim().toLowerCase();
     final userId = data['id_user'];
 
@@ -97,6 +205,10 @@ class _LoginPageState extends State<LoginPage> {
         name: data['nama']?.toString(),
         email: data['email']?.toString(),
       );
+
+      if (clearSupabaseAuthSession) {
+        await supabase.auth.signOut();
+      }
 
       if (!mounted) return;
 
@@ -142,6 +254,10 @@ class _LoginPageState extends State<LoginPage> {
         email: data['email']?.toString(),
       );
 
+      if (clearSupabaseAuthSession) {
+        await supabase.auth.signOut();
+      }
+
       if (!mounted) return;
 
       Navigator.pushAndRemoveUntil(
@@ -171,6 +287,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
+    _authSubscription?.cancel();
     _emailC.dispose();
     _passC.dispose();
     super.dispose();
@@ -203,10 +320,14 @@ class _LoginPageState extends State<LoginPage> {
                   passwordController: _passC,
                   obscurePassword: _obscure,
                   loading: _loading,
+                  googleLoading: _googleLoading,
                   selectedRole: _selectedRole,
                   onRoleChanged: _changeRole,
                   onTogglePassword: () => setState(() => _obscure = !_obscure),
                   onLogin: _loading ? null : _login,
+                  onGoogleLogin: (_loading || _googleLoading)
+                      ? null
+                      : _loginWithGoogle,
                 ),
               ),
             ),
@@ -299,20 +420,24 @@ class _LoginForm extends StatelessWidget {
     required this.passwordController,
     required this.obscurePassword,
     required this.loading,
+    required this.googleLoading,
     required this.selectedRole,
     required this.onRoleChanged,
     required this.onTogglePassword,
     required this.onLogin,
+    required this.onGoogleLogin,
   });
 
   final TextEditingController emailController;
   final TextEditingController passwordController;
   final bool obscurePassword;
   final bool loading;
+  final bool googleLoading;
   final LoginRole selectedRole;
   final ValueChanged<LoginRole> onRoleChanged;
   final VoidCallback onTogglePassword;
   final VoidCallback? onLogin;
+  final VoidCallback? onGoogleLogin;
 
   @override
   Widget build(BuildContext context) {
@@ -422,41 +547,52 @@ class _LoginForm extends StatelessWidget {
                   ),
           ),
         ),
-        const SizedBox(height: 24),
-        Center(
-          child: Text(
-            'Atau',
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              color: const Color(0xFF777777),
-            ),
-          ),
-        ),
-        const SizedBox(height: 24),
-        SizedBox(
-          width: double.infinity,
-          height: 44,
-          child: OutlinedButton.icon(
-            onPressed: null,
-            icon: Image.asset('assets/images/google.png', width: 22),
-            label: Text(
-              'Masuk dengan Google',
+        if (!isOwner) ...[
+          const SizedBox(height: 24),
+          Center(
+            child: Text(
+              'Atau',
               style: GoogleFonts.poppins(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF5E5E5E),
-              ),
-            ),
-            style: OutlinedButton.styleFrom(
-              backgroundColor: Colors.white,
-              disabledBackgroundColor: Colors.white,
-              side: const BorderSide(color: Color(0xFFD8D8D8)),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                fontSize: 12,
+                color: const Color(0xFF777777),
               ),
             ),
           ),
-        ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 44,
+            child: OutlinedButton.icon(
+              onPressed: onGoogleLogin,
+              icon: Image.asset('assets/images/google.png', width: 22),
+              label: googleLoading
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Color(0xFF287D2D),
+                      ),
+                    )
+                  : Text(
+                      'Masuk dengan Google',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF5E5E5E),
+                      ),
+                    ),
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.white,
+                disabledBackgroundColor: Colors.white,
+                side: const BorderSide(color: Color(0xFFD8D8D8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ),
+        ],
         const SizedBox(height: 24),
         Center(
           child: Text.rich(

@@ -223,6 +223,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
               _LogoutTile(
                 onTap: () async {
                   await SessionManager.clearSession();
+                  await supabase.auth.signOut();
                   if (!context.mounted) return;
 
                   Navigator.pushAndRemoveUntil(

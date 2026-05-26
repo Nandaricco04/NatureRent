@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../auth/login_page.dart';
 import '../auth/session_manager.dart';
@@ -71,6 +72,7 @@ class _OwnerMainPageState extends State<OwnerMainPage> {
 
   Future<void> _logout() async {
     await SessionManager.clearSession();
+    await Supabase.instance.client.auth.signOut();
     if (!mounted) return;
 
     Navigator.pushAndRemoveUntil(

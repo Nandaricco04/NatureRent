@@ -30,36 +30,93 @@ class LaporanService {
   Future<LaporanBulan> getLaporanBulan(DateTime month, dynamic ownerId) async {
     if (ownerId == null) return LaporanBulan.empty();
 
-    final awal = DateTime(month.year, month.month, 1).toIso8601String();
-    final akhir = DateTime(month.year, month.month + 1, 1).toIso8601String();
+    final awal = _dateOnly(DateTime(month.year, month.month, 1));
+    final akhir = _dateOnly(DateTime(month.year, month.month + 1, 1));
 
-    final transaksiRes = await _db
-        .from('transaksi')
-        .select(
-          'id_transaksi, user_id, total_harga, jumlah, products!inner(owner_id)',
-        )
-        .eq('products.owner_id', ownerId)
-        .gte('tanggal_mulai', awal)
-        .lt('tanggal_mulai', akhir);
+    final items = await _fetchOwnerTransactionItems(
+      ownerId: ownerId,
+      startDate: awal,
+      endDate: akhir,
+    );
 
-    final transactions = List<Map<String, dynamic>>.from(transaksiRes);
-    final customerIds = transactions
-        .map((row) => row['user_id']?.toString())
+    final transactionIds = items
+        .map((row) => row['transaksi_id']?.toString())
+        .whereType<String>()
+        .where((id) => id.isNotEmpty)
+        .toSet();
+    final customerIds = items
+        .map((row) {
+          final transaksi = row['transaksi'];
+          if (transaksi is! Map) return null;
+          return transaksi['user_id']?.toString();
+        })
         .whereType<String>()
         .where((id) => id.isNotEmpty)
         .toSet();
 
     return LaporanBulan(
-      totalTransaksi: transactions.length,
-      pendapatan: transactions.fold(
+      totalTransaksi: transactionIds.length,
+      pendapatan: items.fold(
         0.0,
-        (sum, row) => sum + ((row['total_harga'] as num?)?.toDouble() ?? 0),
+        (sum, row) => sum + _readDouble(row['subtotal']),
       ),
-      alatDisewa: transactions.fold(
-        0,
-        (sum, row) => sum + ((row['jumlah'] as num?)?.toInt() ?? 0),
-      ),
+      alatDisewa: items.fold(0, (sum, row) => sum + _readInt(row['jumlah'])),
       pelangganBaru: customerIds.length,
     );
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchOwnerTransactionItems({
+    required dynamic ownerId,
+    required String startDate,
+    required String endDate,
+  }) async {
+    try {
+      final data = await _db
+          .from('transaksi_item')
+          .select(
+            'id_transaksi_item, transaksi_id, jumlah, subtotal, '
+            'transaksi!inner(user_id, tanggal_transaksi), '
+            'products!inner(owner_id)',
+          )
+          .eq('products.owner_id', ownerId)
+          .gte('transaksi.tanggal_transaksi', startDate)
+          .lt('transaksi.tanggal_transaksi', endDate);
+
+      return List<Map<String, dynamic>>.from(data);
+    } on PostgrestException catch (e) {
+      if (!e.message.toLowerCase().contains('subtotal')) rethrow;
+
+      final data = await _db
+          .from('transaksi_item')
+          .select(
+            'id_transaksi_item, transaksi_id, jumlah, subtotal_sewa, '
+            'transaksi!inner(user_id, tanggal_transaksi), '
+            'products!inner(owner_id)',
+          )
+          .eq('products.owner_id', ownerId)
+          .gte('transaksi.tanggal_transaksi', startDate)
+          .lt('transaksi.tanggal_transaksi', endDate);
+
+      return List<Map<String, dynamic>>.from(data).map((row) {
+        return {...row, 'subtotal': row['subtotal_sewa']};
+      }).toList();
+    }
+  }
+
+  String _dateOnly(DateTime date) {
+    final year = date.year.toString().padLeft(4, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    return '$year-$month-$day';
+  }
+
+  int _readInt(dynamic value) {
+    if (value is num) return value.toInt();
+    return int.tryParse((value ?? '0').toString()) ?? 0;
+  }
+
+  double _readDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse((value ?? '0').toString()) ?? 0;
   }
 }
