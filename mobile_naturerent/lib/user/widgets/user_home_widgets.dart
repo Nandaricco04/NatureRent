@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../services/user_home_service.dart';
+import '../user_detail_alat.dart';
 
 class UserHomeHeader extends StatelessWidget {
   const UserHomeHeader({
@@ -548,103 +549,118 @@ class UserHomeProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: _cardDecoration(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              color: const Color(0xFFEAF6EC),
-              child: product.imageUrl.isEmpty
-                  ? const Icon(
-                      Icons.terrain,
-                      color: Color(0xFF297B2D),
-                      size: 44,
-                    )
-                  : Image.network(
-                      product.imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) {
-                        return const Icon(
-                          Icons.terrain,
-                          color: Color(0xFF297B2D),
-                          size: 44,
-                        );
-                      },
-                    ),
-            ),
+    return InkWell(
+      borderRadius: BorderRadius.circular(8),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => UserDetailAlat(productId: product.id.toString()),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 8, 8, 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  product.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF212121),
+        );
+      },
+      child: Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: _cardDecoration(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                color: const Color(0xFFEAF6EC),
+                child: product.imageUrl.isEmpty
+                    ? const Icon(
+                        Icons.terrain,
+                        color: Color(0xFF297B2D),
+                        size: 44,
+                      )
+                    : Image.network(
+                        product.imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) {
+                          return const Icon(
+                            Icons.terrain,
+                            color: Color(0xFF297B2D),
+                            size: 44,
+                          );
+                        },
+                      ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 8, 8, 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF212121),
+                    ),
                   ),
-                ),
-                Text(
-                  product.storeName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.poppins(
-                    fontSize: 8,
-                    color: const Color(0xFF6D6A66),
+                  Text(
+                    product.storeName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.poppins(
+                      fontSize: 8,
+                      color: const Color(0xFF6D6A66),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: RichText(
-                        text: TextSpan(
-                          style: GoogleFonts.poppins(
-                            color: const Color(0xFF297B2D),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w800,
-                          ),
-                          children: [
-                            TextSpan(text: _rupiah(product.pricePerDay)),
-                            TextSpan(
-                              text: '\n/hari',
-                              style: GoogleFonts.poppins(
-                                color: const Color(0xFF6D6A66),
-                                fontSize: 8,
-                                fontWeight: FontWeight.w500,
-                              ),
+                  const SizedBox(height: 6),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            style: GoogleFonts.poppins(
+                              color: const Color(0xFF297B2D),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
                             ),
-                          ],
+                            children: [
+                              TextSpan(text: _rupiah(product.pricePerDay)),
+                              TextSpan(
+                                text: '\n/hari',
+                                style: GoogleFonts.poppins(
+                                  color: const Color(0xFF6D6A66),
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    const Icon(Icons.star, color: Color(0xFFE8752A), size: 16),
-                    const SizedBox(width: 2),
-                    Text(
-                      product.rating <= 0
-                          ? '-'
-                          : product.rating.toStringAsFixed(1),
-                      style: GoogleFonts.poppins(
-                        color: const Color(0xFF212121),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
+                      const Icon(
+                        Icons.star,
+                        color: Color(0xFFE8752A),
+                        size: 16,
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      const SizedBox(width: 2),
+                      Text(
+                        product.rating <= 0
+                            ? '-'
+                            : product.rating.toStringAsFixed(1),
+                        style: GoogleFonts.poppins(
+                          color: const Color(0xFF212121),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

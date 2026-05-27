@@ -7,22 +7,39 @@ import 'user_profile_page.dart';
 import 'user_search_page.dart';
 
 class UserMainPage extends StatefulWidget {
-  const UserMainPage({super.key, this.userId, this.name, this.email});
+  const UserMainPage({
+    super.key,
+    this.userId,
+    this.name,
+    this.email,
+    this.initialIndex = 0,
+    this.initialCartId,
+    this.openCartCheckout = false,
+    this.popCartCheckoutOnBack = false,
+  });
 
   final dynamic userId;
   final String? name;
   final String? email;
+  final int initialIndex;
+  final dynamic initialCartId;
+  final bool openCartCheckout;
+  final bool popCartCheckoutOnBack;
 
   @override
   State<UserMainPage> createState() => _UserMainPageState();
 }
 
 class _UserMainPageState extends State<UserMainPage> {
-  int _selectedIndex = 0;
+  late int _selectedIndex = widget.initialIndex;
+  late dynamic _initialCartId = widget.initialCartId;
+  late bool _openCartCheckout = widget.openCartCheckout;
   String _homeLocation = 'Malang';
   String? _searchQuery;
   String _searchLocation = 'Malang';
   dynamic _searchCategoryId;
+  bool _hideBottomNavigation = false;
+  int _cartCheckoutBackSignal = 0;
 
   static const _green = Color(0xFF297B2D);
   static const _background = Color(0xFFF5F2ED);
@@ -30,6 +47,9 @@ class _UserMainPageState extends State<UserMainPage> {
   void _selectTab(int index) {
     setState(() {
       _selectedIndex = index;
+      _hideBottomNavigation = false;
+      _initialCartId = null;
+      _openCartCheckout = false;
       if (index != 0) _searchQuery = null;
     });
   }
@@ -37,6 +57,9 @@ class _UserMainPageState extends State<UserMainPage> {
   void _openSearch(String query, String locationName, dynamic categoryId) {
     setState(() {
       _selectedIndex = 0;
+      _hideBottomNavigation = false;
+      _initialCartId = null;
+      _openCartCheckout = false;
       _homeLocation = locationName;
       _searchQuery = query;
       _searchLocation = locationName;
@@ -45,12 +68,29 @@ class _UserMainPageState extends State<UserMainPage> {
   }
 
   void _closeSearch() {
-    setState(() => _searchQuery = null);
+    setState(() {
+      _searchQuery = null;
+      _hideBottomNavigation = false;
+      _initialCartId = null;
+      _openCartCheckout = false;
+    });
   }
 
   Future<bool> _handleBack() async {
     if (_searchQuery != null) {
       _closeSearch();
+      return false;
+    }
+
+    if (_hideBottomNavigation && widget.popCartCheckoutOnBack) {
+      return true;
+    }
+
+    if (_hideBottomNavigation) {
+      setState(() {
+        _hideBottomNavigation = false;
+        _cartCheckoutBackSignal++;
+      });
       return false;
     }
 
@@ -79,7 +119,20 @@ class _UserMainPageState extends State<UserMainPage> {
           initialCategoryId: _searchCategoryId,
           onBack: _closeSearch,
         ),
-      const UserKeranjangPage(),
+      UserKeranjangPage(
+        initialSelectedCartId: _initialCartId,
+        openCheckoutOnLoad: _openCartCheckout,
+        popCheckoutOnBack: widget.popCartCheckoutOnBack,
+        checkoutBackSignal: _cartCheckoutBackSignal,
+        onCheckoutModeChanged: (value) {
+          if (value && _initialCartId != null) {
+            _initialCartId = null;
+            _openCartCheckout = false;
+          }
+          if (_hideBottomNavigation == value) return;
+          setState(() => _hideBottomNavigation = value);
+        },
+      ),
       const UserPesananPage(),
       UserProfilePage(
         userId: widget.userId,
@@ -94,7 +147,7 @@ class _UserMainPageState extends State<UserMainPage> {
       child: Scaffold(
         backgroundColor: _background,
         body: pages[_selectedIndex],
-        bottomNavigationBar: _searchQuery == null
+        bottomNavigationBar: _searchQuery == null && !_hideBottomNavigation
             ? _bottomNavigationBar()
             : null,
       ),

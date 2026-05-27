@@ -269,7 +269,7 @@ class UserHomeService {
   Future<Map<String, int>> _fetchRentCounts() async {
     try {
       final data = await _supabase
-          .from('transaksi')
+          .from('transaksi_item')
           .select('product_id, jumlah');
       final counts = <String, int>{};
 
