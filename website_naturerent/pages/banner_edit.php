@@ -1,0 +1,218 @@
+<?php
+require_once __DIR__ . '/../repositories/banner_repository.php';
+
+$formErrors = $formErrors ?? [];
+$locations = $locations ?? getLocations();
+$destinations = $destinations ?? getDestinations();
+$oldInput = $oldInput ?? [
+    'id_destination' => '',
+    'nama_destination' => '',
+    'lokasi_id' => '',
+    'gambar' => '',
+];
+
+$editDestination = null;
+$editId = (string) ($_GET['id'] ?? $_POST['id_destination'] ?? '');
+
+foreach ($destinations as $destination) {
+    if (destinationId($destination) === $editId) {
+        $editDestination = $destination;
+        break;
+    }
+}
+
+if ($editDestination === null && $_SERVER['REQUEST_METHOD'] !== 'POST') {
+    $formErrors[] = 'Data destinasi tidak ditemukan.';
+}
+
+if ($editDestination !== null && $_SERVER['REQUEST_METHOD'] !== 'POST') {
+    $oldInput['id_destination'] = destinationId($editDestination);
+    $oldInput['nama_destination'] = destinationTitle($editDestination);
+    $oldInput['lokasi_id'] = (string) ($editDestination['lokasi_id'] ?? $editDestination['id_lokasi'] ?? '');
+    $oldInput['gambar'] = destinationImage($editDestination);
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_destination') {
+    $oldInput['id_destination'] = trim($_POST['id_destination'] ?? '');
+    $oldInput['nama_destination'] = trim($_POST['nama_destination'] ?? '');
+    $oldInput['lokasi_id'] = trim($_POST['lokasi_id'] ?? '');
+    $oldInput['gambar'] = trim($_POST['old_gambar'] ?? '');
+
+    if ($oldInput['id_destination'] === '') {
+        $formErrors[] = 'Data destinasi tidak valid.';
+    }
+
+    if ($oldInput['nama_destination'] === '') {
+        $formErrors[] = 'Nama destinasi wajib diisi.';
+    }
+
+    if ($oldInput['lokasi_id'] === '') {
+        $formErrors[] = 'Lokasi destinasi wajib dipilih.';
+    }
+
+    $imageUrl = $oldInput['gambar'];
+    $hasNewImage = !empty($_FILES['gambar']['tmp_name']) && ($_FILES['gambar']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK;
+
+    if ($imageUrl === '' && !$hasNewImage) {
+        $formErrors[] = 'Gambar destinasi wajib diupload.';
+    }
+
+    if (empty($formErrors) && $hasNewImage) {
+        $imageUpload = uploadDestinationImage($_FILES['gambar']);
+
+        if (!$imageUpload['ok']) {
+            $formErrors[] = $imageUpload['error'];
+        } else {
+            $imageUrl = $imageUpload['url'];
+        }
+    }
+
+    if (empty($formErrors)) {
+        $updateResult = updateDestination((int) $oldInput['id_destination'], $oldInput['nama_destination'], (int) $oldInput['lokasi_id'], $imageUrl);
+
+        if ($updateResult['ok']) {
+            if ($hasNewImage && $oldInput['gambar'] !== '' && $oldInput['gambar'] !== $imageUrl) {
+                deleteDestinationImage($oldInput['gambar']);
+            }
+
+            header('Location: index.php?page=banner');
+            exit;
+        }
+
+        if ($hasNewImage && $imageUrl !== $oldInput['gambar']) {
+            deleteDestinationImage($imageUrl);
+        }
+
+        $formErrors[] = 'Data destinasi gagal diperbarui. Periksa tabel destination atau izin database.';
+    }
+}
+
+$selectedLocationName = '';
+
+foreach ($locations as $location) {
+    if (locationId($location) === $oldInput['lokasi_id']) {
+        $selectedLocationName = locationName($location);
+        break;
+    }
+}
+?>
+<div
+    class="destination-modal"
+    data-destination-modal
+    data-edit-mode="true"
+    data-return-url="index.php?page=banner"
+>
+    <div class="destination-modal-backdrop" data-close-destination-modal></div>
+    <section class="destination-dialog" role="dialog" aria-modal="true" aria-labelledby="destination-modal-title">
+        <div class="destination-dialog-header">
+            <div class="destination-dialog-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+                    <circle cx="8.5" cy="10.5" r="1.5"></circle>
+                    <path d="m21 16-5-5L5 19"></path>
+                </svg>
+            </div>
+            <div>
+                <h2 id="destination-modal-title">Informasi Banner Destinasi</h2>
+                <p>edit Informasi banner destinasi yang di inginkan</p>
+            </div>
+            <button class="destination-close" type="button" data-close-destination-modal aria-label="Tutup modal">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M18 6 6 18"></path>
+                    <path d="m6 6 12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <form class="destination-form" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="update_destination">
+            <input type="hidden" name="id_destination" value="<?= htmlspecialchars($oldInput['id_destination']) ?>">
+            <input type="hidden" name="old_gambar" value="<?= htmlspecialchars($oldInput['gambar']) ?>">
+
+            <label class="destination-field">
+                <span>Nama Destinasi</span>
+                <span class="destination-input-shell">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 7h12"></path>
+                        <path d="M6 12h12"></path>
+                        <path d="M6 17h12"></path>
+                        <path d="M9 4v16"></path>
+                        <path d="M15 4v16"></path>
+                    </svg>
+                    <input
+                        type="text"
+                        name="nama_destination"
+                        value="<?= htmlspecialchars($oldInput['nama_destination']) ?>"
+                        placeholder="Masukkan nama destinasi"
+                        required
+                    >
+                </span>
+            </label>
+
+            <label class="destination-field">
+                <span>Lokasi Destinasi</span>
+                <span class="destination-input-shell">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 21s7-5.2 7-11a7 7 0 0 0-14 0c0 5.8 7 11 7 11Z"></path>
+                        <circle cx="12" cy="10" r="2"></circle>
+                    </svg>
+                    <input type="hidden" name="lokasi_id" value="<?= htmlspecialchars($oldInput['lokasi_id']) ?>" data-location-value required>
+                    <button class="destination-location-trigger" type="button" data-location-trigger>
+                        <span data-location-label><?= htmlspecialchars($selectedLocationName !== '' ? $selectedLocationName : 'Pilih Lokasi') ?></span>
+                    </button>
+                    <svg class="destination-select-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="m6 9 6 6 6-6"></path>
+                    </svg>
+                    <span class="destination-location-menu" data-location-menu hidden>
+                        <?php if (empty($locations)): ?>
+                            <span class="destination-location-empty">Lokasi belum tersedia</span>
+                        <?php endif; ?>
+                        <?php foreach ($locations as $location): ?>
+                            <?php $id = locationId($location); ?>
+                            <?php if ($id !== ''): ?>
+                                <button
+                                    class="destination-location-option <?= $oldInput['lokasi_id'] === $id ? 'is-selected' : '' ?>"
+                                    type="button"
+                                    data-location-option
+                                    data-location-id="<?= htmlspecialchars($id) ?>"
+                                    data-location-name="<?= htmlspecialchars(locationName($location)) ?>"
+                                >
+                                    <?= htmlspecialchars(locationName($location)) ?>
+                                </button>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </span>
+                </span>
+            </label>
+
+            <label class="destination-field">
+                <span>Gambar Destinasi</span>
+                <span class="destination-upload-field">
+                    <span class="destination-file-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 16V4"></path>
+                            <path d="m7 9 5-5 5 5"></path>
+                            <path d="M5 20h14"></path>
+                        </svg>
+                    </span>
+                    <span class="destination-file-copy">
+                        <strong>Upload File Gambar</strong>
+                        <small>Format: JPG, PNG, JPEG. Maksimal 3 MB</small>
+                    </span>
+                    <span class="destination-file-button">Upload File</span>
+                    <input type="file" name="gambar" accept="image/png,image/jpeg,image/jpg" data-destination-file>
+                </span>
+            </label>
+
+            <div class="destination-preview" data-destination-preview <?= $oldInput['gambar'] === '' ? 'hidden' : '' ?>>
+                <img src="<?= htmlspecialchars($oldInput['gambar']) ?>" alt="Preview gambar destinasi">
+                <span data-destination-file-name><?= $oldInput['gambar'] !== '' ? 'Gambar saat ini' : '' ?></span>
+            </div>
+
+            <div class="destination-form-actions">
+                <button class="destination-cancel" type="button" data-close-destination-modal>Batal</button>
+                <button class="destination-save" type="submit">Simpan</button>
+            </div>
+        </form>
+    </section>
+</div>
