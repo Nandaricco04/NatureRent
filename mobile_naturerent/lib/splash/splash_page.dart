@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../auth/login_page.dart';
 import '../auth/session_manager.dart';
 import '../owner/owner_main_page.dart';
@@ -39,6 +40,14 @@ class _SplashPageState extends State<SplashPage> {
         email: session.email,
       );
     } else if (session.isOwner) {
+      final ownerIsApproved = await _isOwnerApproved(session.userId);
+      if (!ownerIsApproved) {
+        await SessionManager.clearSession();
+        if (!mounted) return;
+        setState(() => _checkingSession = false);
+        return;
+      }
+
       page = OwnerMainPage(userId: session.userId);
     } else {
       await SessionManager.clearSession();
@@ -52,6 +61,21 @@ class _SplashPageState extends State<SplashPage> {
       MaterialPageRoute(builder: (_) => page),
       (route) => false,
     );
+  }
+
+  Future<bool> _isOwnerApproved(dynamic userId) async {
+    final owner = await Supabase.instance.client
+        .from('owner')
+        .select('status_verifikasi')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+    final status = (owner?['status_verifikasi'] ?? '')
+        .toString()
+        .trim()
+        .toLowerCase();
+
+    return status == 'approved';
   }
 
   @override

@@ -243,7 +243,7 @@ class _LoginPageState extends State<LoginPage> {
           .toLowerCase();
 
       if (status != 'approved') {
-        _show('Akun pemilik rental belum disetujui');
+        _show(_ownerStatusMessage(status));
         return;
       }
 
@@ -272,6 +272,18 @@ class _LoginPageState extends State<LoginPage> {
 
   void _show(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  String _ownerStatusMessage(String status) {
+    if (status == 'inactive') {
+      return 'Akun pemilik rental sedang dinonaktifkan';
+    }
+
+    if (status == 'rejected') {
+      return 'Akun pemilik rental ditolak';
+    }
+
+    return 'Akun pemilik rental belum disetujui';
   }
 
   void _changeRole(LoginRole role) {
