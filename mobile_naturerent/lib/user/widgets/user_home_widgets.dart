@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -371,11 +373,81 @@ class _LocationBottomSheetState extends State<_LocationBottomSheet> {
   }
 }
 
-class UserHomeBanner extends StatelessWidget {
-  const UserHomeBanner({super.key});
+class UserHomeBanner extends StatefulWidget {
+  const UserHomeBanner({super.key, required this.destinations});
+
+  final List<UserHomeDestination> destinations;
+
+  @override
+  State<UserHomeBanner> createState() => _UserHomeBannerState();
+}
+
+class _UserHomeBannerState extends State<UserHomeBanner> {
+  final _pageController = PageController();
+  Timer? _timer;
+  int _activeIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _startAutoSlide();
+  }
+
+  @override
+  void didUpdateWidget(covariant UserHomeBanner oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (!_hasSameDestinations(oldWidget.destinations, widget.destinations)) {
+      _activeIndex = 0;
+      if (_pageController.hasClients) {
+        _pageController.jumpToPage(0);
+      }
+      _startAutoSlide();
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _startAutoSlide() {
+    _timer?.cancel();
+    if (widget.destinations.length < 2) return;
+
+    _timer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (!mounted || !_pageController.hasClients) return;
+
+      final nextIndex = (_activeIndex + 1) % widget.destinations.length;
+      _pageController.animateToPage(
+        nextIndex,
+        duration: const Duration(milliseconds: 450),
+        curve: Curves.easeOutCubic,
+      );
+    });
+  }
+
+  bool _hasSameDestinations(
+    List<UserHomeDestination> previous,
+    List<UserHomeDestination> current,
+  ) {
+    if (previous.length != current.length) return false;
+
+    for (var i = 0; i < previous.length; i++) {
+      if (previous[i].id?.toString() != current[i].id?.toString()) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final banners = widget.destinations;
+
     return Container(
       height: 160,
       width: double.infinity,
@@ -383,7 +455,103 @@ class UserHomeBanner extends StatelessWidget {
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
       child: Stack(
         fit: StackFit.expand,
-        children: [Image.asset('assets/images/iklan.png', fit: BoxFit.cover)],
+        children: [
+          if (banners.isEmpty)
+            Container(
+              color: const Color(0xFFEAF6EC),
+              child: const Icon(
+                Icons.terrain,
+                color: Color(0xFF297B2D),
+                size: 46,
+              ),
+            )
+          else
+            PageView.builder(
+              controller: _pageController,
+              itemCount: banners.length,
+              onPageChanged: (index) {
+                setState(() => _activeIndex = index);
+              },
+              itemBuilder: (context, index) {
+                final banner = banners[index];
+
+                return Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.network(
+                      banner.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) {
+                        return Container(
+                          color: const Color(0xFFEAF6EC),
+                          child: const Icon(
+                            Icons.terrain,
+                            color: Color(0xFF297B2D),
+                            size: 46,
+                          ),
+                        );
+                      },
+                    ),
+                    const DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Color(0x00000000), Color(0x99000000)],
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: 14,
+                      right: 14,
+                      bottom: 12,
+                      child: Text(
+                        banner.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          shadows: const [
+                            Shadow(
+                              color: Color(0x99000000),
+                              blurRadius: 8,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          if (banners.length > 1)
+            Positioned(
+              right: 14,
+              top: 12,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: List.generate(banners.length, (index) {
+                  final selected = index == _activeIndex;
+
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 220),
+                    width: selected ? 18 : 6,
+                    height: 6,
+                    margin: const EdgeInsets.only(left: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(
+                        alpha: selected ? 0.95 : 0.55,
+                      ),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  );
+                }),
+              ),
+            ),
+        ],
       ),
     );
   }

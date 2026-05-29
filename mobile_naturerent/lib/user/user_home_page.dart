@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'services/user_home_service.dart';
 import 'widgets/user_home_widgets.dart';
-import 'user_detail_alat.dart';
 
 class UserHomePage extends StatefulWidget {
   const UserHomePage({
@@ -34,6 +33,7 @@ class _UserHomePageState extends State<UserHomePage> {
   List<UserHomeLocation> _locations = [];
   List<UserHomeCategory> _categories = [];
   List<UserHomeProduct> _products = [];
+  List<UserHomeDestination> _destinations = [];
 
   static const _green = Color(0xFF297B2D);
 
@@ -77,6 +77,7 @@ class _UserHomePageState extends State<UserHomePage> {
         _locations = data.locations;
         _categories = data.categories;
         _products = data.products;
+        _destinations = data.destinations;
 
         if (_locations.isNotEmpty &&
             !_locations.any((location) => location.name == _selectedLocation)) {
@@ -151,7 +152,7 @@ class _UserHomePageState extends State<UserHomePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const UserHomeBanner(),
+                  UserHomeBanner(destinations: _destinations),
                   const SizedBox(height: 26),
                   _SectionTitle('Kategori'),
                   const SizedBox(height: 12),
