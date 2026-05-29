@@ -133,7 +133,8 @@ class _UserMainPageState extends State<UserMainPage> {
           setState(() => _hideBottomNavigation = value);
         },
       ),
-      const UserPesananPage(),
+      UserPesananPage(onBack: () => _selectTab(0)),
+
       UserProfilePage(
         userId: widget.userId,
         name: widget.name,
