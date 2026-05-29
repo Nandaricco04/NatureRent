@@ -44,16 +44,32 @@ class UserHomeProduct {
   final int rentCount;
 }
 
+class UserHomeDestination {
+  const UserHomeDestination({
+    required this.id,
+    required this.name,
+    required this.locationName,
+    required this.imageUrl,
+  });
+
+  final dynamic id;
+  final String name;
+  final String locationName;
+  final String imageUrl;
+}
+
 class UserHomeData {
   const UserHomeData({
     required this.locations,
     required this.categories,
     required this.products,
+    required this.destinations,
   });
 
   final List<UserHomeLocation> locations;
   final List<UserHomeCategory> categories;
   final List<UserHomeProduct> products;
+  final List<UserHomeDestination> destinations;
 }
 
 class UserHomeService {
@@ -84,6 +100,7 @@ class UserHomeService {
       locations: data.locations,
       categories: data.categories,
       products: _balancedPopularProducts(data.products).take(6).toList(),
+      destinations: data.destinations,
     );
   }
 
@@ -110,6 +127,7 @@ class UserHomeService {
       _fetchOwners(),
       _fetchProducts(),
       _fetchRentCounts(),
+      _fetchDestinations(),
     ]);
 
     final locations = results[0] as List<UserHomeLocation>;
@@ -117,6 +135,7 @@ class UserHomeService {
     final owners = results[2] as List<Map<String, dynamic>>;
     final products = results[3] as List<Map<String, dynamic>>;
     final rentCounts = results[4] as Map<String, int>;
+    final destinations = results[5] as List<Map<String, dynamic>>;
 
     final ownerById = {
       for (final owner in owners) owner['id_owner']?.toString(): owner,
@@ -124,6 +143,12 @@ class UserHomeService {
     final categoryById = {
       for (final category in categories) category.id?.toString(): category,
     };
+    final locationById = <String, String>{};
+    for (final location in locations) {
+      final locationId = location.id?.toString();
+      if (locationId == null || locationId.isEmpty) continue;
+      locationById[locationId] = location.name;
+    }
     final query = searchQuery.trim().toLowerCase();
 
     final mappedProducts = products
@@ -183,6 +208,11 @@ class UserHomeService {
       locations: locations,
       categories: categories,
       products: filteredProducts,
+      destinations: _selectedDestinations(
+        destinations: destinations,
+        locationById: locationById,
+        locationName: locationName,
+      ),
     );
   }
 
@@ -266,6 +296,19 @@ class UserHomeService {
     return List<Map<String, dynamic>>.from(data);
   }
 
+  Future<List<Map<String, dynamic>>> _fetchDestinations() async {
+    try {
+      final data = await _supabase
+          .from('destination')
+          .select('id_destination, lokasi_id, nama_destination, gambar')
+          .order('id_destination');
+
+      return List<Map<String, dynamic>>.from(data);
+    } catch (_) {
+      return [];
+    }
+  }
+
   Future<Map<String, int>> _fetchRentCounts() async {
     try {
       final data = await _supabase
@@ -334,6 +377,49 @@ class UserHomeService {
     final ratingCompare = b.rating.compareTo(a.rating);
     if (ratingCompare != 0) return ratingCompare;
     return a.name.compareTo(b.name);
+  }
+
+  List<UserHomeDestination> _selectedDestinations({
+    required List<Map<String, dynamic>> destinations,
+    required Map<String, String> locationById,
+    required String? locationName,
+  }) {
+    if (destinations.isEmpty) return [];
+
+    final selectedLocation = (locationName ?? '').trim().toLowerCase();
+    final selectedDestinations = <UserHomeDestination>[];
+
+    for (final destination in destinations) {
+      final destinationLocationName =
+          locationById[destination['lokasi_id']?.toString()] ?? '';
+
+      if (selectedLocation.isNotEmpty &&
+          destinationLocationName.toLowerCase() != selectedLocation) {
+        continue;
+      }
+
+      final mapped = _mapDestination(destination, destinationLocationName);
+      if (mapped != null) selectedDestinations.add(mapped);
+    }
+
+    return selectedDestinations;
+  }
+
+  UserHomeDestination? _mapDestination(
+    Map<String, dynamic> destination,
+    String locationName,
+  ) {
+    final name = (destination['nama_destination'] ?? '').toString();
+    final imageUrl = (destination['gambar'] ?? '').toString();
+
+    if (name.isEmpty || imageUrl.isEmpty) return null;
+
+    return UserHomeDestination(
+      id: destination['id_destination'],
+      name: name,
+      locationName: locationName,
+      imageUrl: imageUrl,
+    );
   }
 
   int _readInt(dynamic value) {
