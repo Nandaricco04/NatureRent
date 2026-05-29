@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-require_once __DIR__ . '/config/supabase.php';
+require_once __DIR__ . '/repositories/user_repository.php';
 
 if (!empty($_SESSION['admin'])) {
     header('Location: index.php');

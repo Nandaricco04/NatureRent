@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../config/supabase.php';
+require_once __DIR__ . '/../repositories/user_repository.php';
 
 $deleteError = '';
 
@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
 
 $keyword = strtolower(trim($_GET['search'] ?? ''));
 $currentPage = max(1, (int) ($_GET['p'] ?? 1));
-$perPage = 6;
+$perPage = 10;
 
 $users = getUsersByRole('user');
 

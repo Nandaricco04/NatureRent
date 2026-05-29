@@ -11,7 +11,7 @@ $allowedPages = [
     'kategori' => 'Kategori Alat',
     'transaksi' => 'Transaksi',
     'komplain' => 'Komplain',
-    'banner' => 'Baner Destinasi',
+    'banner' => 'Banner Destinasi',
     'promosi' => 'Promosi Alat',
 ];
 
@@ -41,6 +41,9 @@ if ($page === 'users' && $userAction === 'add') {
     <link rel="stylesheet" href="assets/css/style.css">
     <?php if ($page === 'users'): ?>
         <link rel="stylesheet" href="assets/css/user_style.css">
+    <?php endif; ?>
+    <?php if ($page === 'banner'): ?>
+        <link rel="stylesheet" href="assets/css/banner_style.css">
     <?php endif; ?>
 </head>
 <body>
@@ -88,5 +91,8 @@ if ($page === 'users' && $userAction === 'add') {
         </main>
     </div>
     <script src="assets/js/script.js?v=<?= filemtime(__DIR__ . '/assets/js/script.js') ?>"></script>
+    <?php if ($page === 'banner'): ?>
+        <script src="assets/js/banner_script.js?v=<?= filemtime(__DIR__ . '/assets/js/banner_script.js') ?>"></script>
+    <?php endif; ?>
 </body>
 </html>

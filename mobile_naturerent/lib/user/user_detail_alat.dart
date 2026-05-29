@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'services/user_detail_alat_service.dart';
 import 'user_main_page.dart';
 import 'widgets/user_detail_alat_widgets.dart';
+import 'user_profil_toko_page.dart';
 
 class UserDetailAlat extends StatefulWidget {
   final String productId;
@@ -397,7 +398,16 @@ class _UserDetailAlatState extends State<UserDetailAlat> {
                       child: SizedBox(
                         height: 36, // lebih kecil biar mirip UI
                         child: ElevatedButton.icon(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => UserProfilTokoPage(
+                                  ownerId: product!['owner_id'],
+                                )
+                              )
+                            );
+                          },
                           icon: const Icon(
                             Icons.storefront_outlined,
                             size: 16,
