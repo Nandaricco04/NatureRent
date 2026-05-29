@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'services/user_profil_toko_service.dart';
@@ -52,12 +53,20 @@ class _UserProfilTokoPageState extends State<UserProfilTokoPage> {
 
   @override
   Widget build(BuildContext context) {
+    const primaryGreen = Color(0xFF297B2D);
+    final topInset = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF7F6F2),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF297B2D)))
-          : SafeArea(
-              child: CustomScrollView(
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: primaryGreen,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
+        child: _loading
+            ? const Center(child: CircularProgressIndicator(color: primaryGreen))
+            : CustomScrollView(
                 slivers: [
                   SliverToBoxAdapter(
                     child: Stack(
@@ -67,54 +76,51 @@ class _UserProfilTokoPageState extends State<UserProfilTokoPage> {
                           width: double.infinity,
                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
                           alignment: Alignment.topLeft,
-                          height: 190,
+                          height: 190 + topInset,
                           decoration: const BoxDecoration(
-                            color: Color(0xFF297B2D),
+                            color: primaryGreen,
                             borderRadius: BorderRadius.only(
                               bottomLeft: Radius.circular(28),
                               bottomRight: Radius.circular(28),
                             ),
                           ),
-                          child: SafeArea(
-                            bottom: false,
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 28),
-                              child: Row(
-                                children: [
-                                  GestureDetector(
-                                    onTap: () => Navigator.pop(context),
-                                    child: Container(
-                                      width: 36,
-                                      height: 36,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(50),
-                                      ),
-                                      child: const Icon(
-                                        Icons.arrow_back,
-                                        color: Colors.white,
-                                        size: 18,
-                                      ),
+                          child: Padding(
+                            padding: EdgeInsets.only(top: topInset + 28),
+                            child: Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () => Navigator.pop(context),
+                                  child: Container(
+                                    width: 36,
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(50),
                                     ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  const Text(
-                                    'Profil Toko',
-                                    style: TextStyle(
+                                    child: const Icon(
+                                      Icons.arrow_back,
                                       color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w700,
+                                      size: 18,
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                                const SizedBox(width: 12),
+                                const Text(
+                                  'Profil Toko',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                         Positioned(
                           left: 16,
                           right: 16,
-                          top: 100,
+                          top: topInset + 100,
                           child: _owner == null
                               ? const SizedBox()
                               : UserStoreCardWidget(
@@ -136,7 +142,7 @@ class _UserProfilTokoPageState extends State<UserProfilTokoPage> {
                         style: GoogleFonts.poppins(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF297B2D),
+                          color: primaryGreen,
                         ),
                       ),
                     ),
@@ -175,7 +181,7 @@ class _UserProfilTokoPageState extends State<UserProfilTokoPage> {
                         ),
                 ],
               ),
-            ),
+      ),
     );
   }
 }
