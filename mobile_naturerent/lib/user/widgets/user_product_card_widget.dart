@@ -24,6 +24,10 @@ class UserProductCardWidget extends StatelessWidget {
     final nama = (product['name'] ?? '').toString();
     final harga = ((product['price_per_day'] ?? 0) as num).toDouble();
     final rating = ((product['rating'] ?? 0) as num).toDouble();
+    final advertised =
+        product['iklan'] == true ||
+        (product['iklan'] ?? '').toString().toLowerCase() == 'true' ||
+        product['advertised'] == true;
 
     return InkWell(
       borderRadius: BorderRadius.circular(8),
@@ -48,20 +52,59 @@ class UserProductCardWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Container(
-                width: double.infinity,
-                color: const Color(0xFFEAF6EC),
-                child: imageUrl.isEmpty
-                    ? const Icon(Icons.terrain, color: Color(0xFF297B2D), size: 44)
-                    : Image.network(
-                        imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Icon(
-                          Icons.terrain,
-                          color: Color(0xFF297B2D),
-                          size: 44,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Container(
+                      color: const Color(0xFFEAF6EC),
+                      child: imageUrl.isEmpty
+                          ? const Icon(
+                              Icons.terrain,
+                              color: Color(0xFF297B2D),
+                              size: 44,
+                            )
+                          : Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => const Icon(
+                                Icons.terrain,
+                                color: Color(0xFF297B2D),
+                                size: 44,
+                              ),
+                            ),
+                    ),
+                  ),
+                  if (advertised)
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF297B2D),
+                          borderRadius: BorderRadius.circular(5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.12),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Text(
+                          'Iklan',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
+                    ),
+                ],
               ),
             ),
             Padding(

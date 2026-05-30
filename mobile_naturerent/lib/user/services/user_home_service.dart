@@ -28,6 +28,7 @@ class UserHomeProduct {
     required this.imageUrl,
     required this.rating,
     required this.rentCount,
+    required this.advertised,
   });
 
   final dynamic id;
@@ -42,6 +43,7 @@ class UserHomeProduct {
   final String imageUrl;
   final double rating;
   final int rentCount;
+  final bool advertised;
 }
 
 class UserHomeDestination {
@@ -128,6 +130,7 @@ class UserHomeService {
       _fetchProducts(),
       _fetchRentCounts(),
       _fetchDestinations(),
+      _fetchActiveAdvertisedProductIds(),
     ]);
 
     final locations = results[0] as List<UserHomeLocation>;
@@ -136,6 +139,7 @@ class UserHomeService {
     final products = results[3] as List<Map<String, dynamic>>;
     final rentCounts = results[4] as Map<String, int>;
     final destinations = results[5] as List<Map<String, dynamic>>;
+    final activeAdvertisedIds = results[6] as Set<String>;
 
     final ownerById = {
       for (final owner in owners) owner['id_owner']?.toString(): owner,
@@ -169,6 +173,9 @@ class UserHomeService {
             imageUrl: (product['image_url'] ?? '').toString(),
             rating: _readDouble(product['rating']),
             rentCount: rentCounts[product['id_product']?.toString()] ?? 0,
+            advertised:
+                _readBool(product['iklan']) ||
+                activeAdvertisedIds.contains(product['id_product']?.toString()),
           );
         })
         .where((product) => product.stock > 0)
@@ -196,12 +203,18 @@ class UserHomeService {
     );
     if (hasRentData) {
       filteredProducts.sort((a, b) {
+        final adCompare = _compareAdvertised(a, b);
+        if (adCompare != 0) return adCompare;
         final rentCompare = b.rentCount.compareTo(a.rentCount);
         if (rentCompare != 0) return rentCompare;
         return b.rating.compareTo(a.rating);
       });
     } else {
-      filteredProducts.sort((a, b) => b.rating.compareTo(a.rating));
+      filteredProducts.sort((a, b) {
+        final adCompare = _compareAdvertised(a, b);
+        if (adCompare != 0) return adCompare;
+        return b.rating.compareTo(a.rating);
+      });
     }
 
     return UserHomeData(
@@ -290,7 +303,7 @@ class UserHomeService {
     final data = await _supabase
         .from('products')
         .select(
-          'id_product, category_id, owner_id, name, description, price_per_day, stock, image_url, rating',
+          'id_product, category_id, owner_id, name, description, price_per_day, stock, image_url, rating, iklan',
         );
 
     return List<Map<String, dynamic>>.from(data);
@@ -324,6 +337,23 @@ class UserHomeService {
       }
 
       return counts;
+    } catch (_) {
+      return {};
+    }
+  }
+
+  Future<Set<String>> _fetchActiveAdvertisedProductIds() async {
+    try {
+      final data = await _supabase
+          .from('iklan_sewa')
+          .select('alat_id')
+          .eq('status', 'aktif');
+
+      return List<Map<String, dynamic>>.from(data)
+          .map((row) => row['alat_id']?.toString())
+          .whereType<String>()
+          .where((id) => id.isNotEmpty)
+          .toSet();
     } catch (_) {
       return {};
     }
@@ -372,11 +402,18 @@ class UserHomeService {
   }
 
   int _comparePopularProduct(UserHomeProduct a, UserHomeProduct b) {
+    final adCompare = _compareAdvertised(a, b);
+    if (adCompare != 0) return adCompare;
     final rentCompare = b.rentCount.compareTo(a.rentCount);
     if (rentCompare != 0) return rentCompare;
     final ratingCompare = b.rating.compareTo(a.rating);
     if (ratingCompare != 0) return ratingCompare;
     return a.name.compareTo(b.name);
+  }
+
+  int _compareAdvertised(UserHomeProduct a, UserHomeProduct b) {
+    if (a.advertised == b.advertised) return 0;
+    return a.advertised ? -1 : 1;
   }
 
   List<UserHomeDestination> _selectedDestinations({
@@ -430,5 +467,10 @@ class UserHomeService {
   double _readDouble(dynamic value) {
     if (value is num) return value.toDouble();
     return double.tryParse((value ?? '0').toString()) ?? 0;
+  }
+
+  bool _readBool(dynamic value) {
+    if (value is bool) return value;
+    return (value ?? '').toString().toLowerCase() == 'true';
   }
 }

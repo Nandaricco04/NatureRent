@@ -79,11 +79,13 @@ class OwnerToolCard extends StatelessWidget {
   const OwnerToolCard({
     super.key,
     required this.product,
+    required this.onAdvertise,
     required this.onEdit,
     required this.onDelete,
   });
 
   final Map<String, dynamic> product;
+  final VoidCallback onAdvertise;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
@@ -101,6 +103,12 @@ class OwnerToolCard extends StatelessWidget {
     final rating = product['rating'] ?? 0;
     final kapasitas = (product['kapasitas'] ?? '').toString();
     final category = (product['categories']?['name'] ?? '').toString();
+    final adStatus = (product['status_iklan'] ?? '').toString();
+    final advertised =
+        product['iklan'] == true ||
+        (product['iklan'] ?? '').toString().toLowerCase() == 'true' ||
+        adStatus == 'aktif';
+    final adButton = _adButtonState(adStatus, advertised);
     final detail = [
       if (category.isNotEmpty) category,
       if (kapasitas.isNotEmpty) 'kapasitas $kapasitas',
@@ -227,10 +235,10 @@ class OwnerToolCard extends StatelessWidget {
               ),
               const Spacer(),
               _ActionButton(
-                text: 'Iklankan',
-                backgroundColor: const Color(0xFF9AF0A2),
-                textColor: _green,
-                onPressed: () {},
+                text: adButton.text,
+                backgroundColor: adButton.backgroundColor,
+                textColor: adButton.textColor,
+                onPressed: adButton.enabled ? onAdvertise : null,
               ),
               const SizedBox(width: 10),
               _ActionButton(
@@ -252,6 +260,56 @@ class OwnerToolCard extends StatelessWidget {
       ),
     );
   }
+
+  _AdButtonState _adButtonState(String status, bool advertised) {
+    if (status == 'menunggu_verifikasi') {
+      return const _AdButtonState(
+        text: 'Menunggu',
+        backgroundColor: Color(0xFFFFE6B8),
+        textColor: Color(0xFF946014),
+        enabled: false,
+      );
+    }
+
+    if (advertised || status == 'aktif') {
+      return const _AdButtonState(
+        text: 'Aktif',
+        backgroundColor: _green,
+        textColor: Colors.white,
+        enabled: false,
+      );
+    }
+
+    if (status == 'ditolak') {
+      return const _AdButtonState(
+        text: 'Ajukan',
+        backgroundColor: Color(0xFFFFD8C8),
+        textColor: Color(0xFFC44721),
+        enabled: true,
+      );
+    }
+
+    return const _AdButtonState(
+      text: 'Iklankan',
+      backgroundColor: Color(0xFF9AF0A2),
+      textColor: _green,
+      enabled: true,
+    );
+  }
+}
+
+class _AdButtonState {
+  const _AdButtonState({
+    required this.text,
+    required this.backgroundColor,
+    required this.textColor,
+    required this.enabled,
+  });
+
+  final String text;
+  final Color backgroundColor;
+  final Color textColor;
+  final bool enabled;
 }
 
 class OwnerDeleteProductSheet extends StatefulWidget {
@@ -465,7 +523,7 @@ class _ActionButton extends StatelessWidget {
   final String text;
   final Color backgroundColor;
   final Color textColor;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -476,7 +534,9 @@ class _ActionButton extends StatelessWidget {
         onPressed: onPressed,
         style: TextButton.styleFrom(
           backgroundColor: backgroundColor,
+          disabledBackgroundColor: backgroundColor,
           foregroundColor: textColor,
+          disabledForegroundColor: textColor,
           padding: EdgeInsets.zero,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
         ),

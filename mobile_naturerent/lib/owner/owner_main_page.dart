@@ -107,7 +107,7 @@ class _OwnerMainPageState extends State<OwnerMainPage> {
                 children: [
                   OwnerHomePage(ownerId: _ownerId),
                   const OwnerPesananPage(),
-                  OwnerAlatPage(ownerId: _ownerId),
+                  OwnerAlatPage(ownerId: _ownerId, userId: widget.userId),
                   OwnerLaporanPage(ownerId: _ownerId),
                 ],
               ),

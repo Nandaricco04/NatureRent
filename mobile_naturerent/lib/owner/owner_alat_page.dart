@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 
 import 'owner_edit_alat_page.dart';
+import 'owner_iklan_alat_page.dart';
 import 'owner_tambah_alat_page.dart';
 import 'services/owner_product_service.dart';
 import 'widgets/owner_alat_widgets.dart';
 
 class OwnerAlatPage extends StatefulWidget {
-  const OwnerAlatPage({super.key, required this.ownerId});
+  const OwnerAlatPage({super.key, required this.ownerId, required this.userId});
 
   final dynamic ownerId;
+  final dynamic userId;
 
   @override
   State<OwnerAlatPage> createState() => _OwnerAlatPageState();
@@ -108,6 +110,25 @@ class _OwnerAlatPageState extends State<OwnerAlatPage> {
     if (saved == true) _loadProducts();
   }
 
+  Future<void> _openAdvertiseProduct(Map<String, dynamic> product) async {
+    if (widget.userId == null) {
+      _show('Data user belum siap');
+      return;
+    }
+
+    final saved = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => OwnerIklanAlatPage(
+          userId: widget.userId,
+          product: product,
+        ),
+      ),
+    );
+
+    if (saved == true) _loadProducts();
+  }
+
   Future<void> _confirmDeleteProduct(Map<String, dynamic> product) async {
     final deleted = await showModalBottomSheet<bool>(
       context: context,
@@ -134,86 +155,92 @@ class _OwnerAlatPageState extends State<OwnerAlatPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _searchC,
-                  onChanged: (value) {
-                    setState(() => _searchQuery = value);
-                  },
-                  decoration: InputDecoration(
-                    hintText: 'Cari',
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: _searchQuery.isEmpty
-                        ? null
-                        : IconButton(
-                            onPressed: () {
-                              _searchC.clear();
-                              setState(() => _searchQuery = '');
-                            },
-                            icon: const Icon(Icons.close),
-                          ),
-                    filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 12,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5),
-                      borderSide: BorderSide.none,
+    return RefreshIndicator(
+      color: _green,
+      onRefresh: _loadProducts,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchC,
+                    onChanged: (value) {
+                      setState(() => _searchQuery = value);
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Cari',
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchQuery.isEmpty
+                          ? null
+                          : IconButton(
+                              onPressed: () {
+                                _searchC.clear();
+                                setState(() => _searchQuery = '');
+                              },
+                              icon: const Icon(Icons.close),
+                            ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5),
+                        borderSide: BorderSide.none,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              SizedBox(
-                width: 44,
-                height: 44,
-                child: ElevatedButton(
-                  onPressed: _openAddProduct,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _green,
-                    padding: EdgeInsets.zero,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
+                const SizedBox(width: 10),
+                SizedBox(
+                  width: 44,
+                  height: 44,
+                  child: ElevatedButton(
+                    onPressed: _openAddProduct,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _green,
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      elevation: 0,
                     ),
-                    elevation: 0,
+                    child: const Icon(Icons.add, color: Colors.white, size: 28),
                   ),
-                  child: const Icon(Icons.add, color: Colors.white, size: 28),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 22),
-          if (_loading)
-            const Padding(
-              padding: EdgeInsets.only(top: 80),
-              child: CircularProgressIndicator(color: _green),
-            )
-          else if (_products.isEmpty)
-            const OwnerEmptyProduct()
-          else if (_filteredProducts.isEmpty)
-            const OwnerNoSearchResult()
-          else
-            ..._filteredProducts.map((product) => Padding(
-                  padding: const EdgeInsets.only(bottom: 14),
-                  child: OwnerToolCard(
-                    product: product,
-                    onEdit: () => _openEditProduct(product),
-                    onDelete: () => _confirmDeleteProduct(product),
-                  ),
-                )),
-        ],
+              ],
+            ),
+            const SizedBox(height: 22),
+            if (_loading)
+              const Padding(
+                padding: EdgeInsets.only(top: 80),
+                child: CircularProgressIndicator(color: _green),
+              )
+            else if (_products.isEmpty)
+              const OwnerEmptyProduct()
+            else if (_filteredProducts.isEmpty)
+              const OwnerNoSearchResult()
+            else
+              ..._filteredProducts.map((product) => Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: OwnerToolCard(
+                      product: product,
+                      onAdvertise: () => _openAdvertiseProduct(product),
+                      onEdit: () => _openEditProduct(product),
+                      onDelete: () => _confirmDeleteProduct(product),
+                    ),
+                  )),
+          ],
+        ),
       ),
     );
   }
