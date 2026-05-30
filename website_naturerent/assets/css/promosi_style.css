@@ -1,0 +1,329 @@
+.promosi-card {
+    min-height: 434px;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.promosi-header {
+    min-height: 98px;
+    display: flex;
+    align-items: center;
+    padding: 30px 30px 24px;
+    border-bottom: 1px solid #d6d6d6;
+}
+
+.promosi-header h2 {
+    margin: 0;
+    color: #252525;
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.promosi-alert {
+    margin: 16px 30px 0;
+    padding: 10px 12px;
+    border: 1px solid #e6a3a3;
+    border-radius: 5px;
+    background: #fff1f1;
+    color: #a52828;
+    font-size: 13px;
+}
+
+.promosi-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.promosi-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #111;
+}
+
+.promosi-table th,
+.promosi-table td {
+    padding: 22px 24px;
+    border-bottom: 1px solid #d6d6d6;
+    text-align: left;
+    font-size: 15px;
+    vertical-align: middle;
+}
+
+.promosi-table th {
+    padding-top: 19px;
+    padding-bottom: 19px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.promosi-table th:first-child,
+.promosi-table td:first-child {
+    width: 74px;
+    text-align: center;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.promosi-table th:nth-child(2),
+.promosi-table td:nth-child(2) {
+    width: 220px;
+}
+
+.promosi-table th:nth-child(5),
+.promosi-table td:nth-child(5) {
+    min-width: 190px;
+}
+
+.promosi-product {
+    display: block;
+    max-width: 190px;
+    line-height: 1.35;
+}
+
+.promosi-table small {
+    display: block;
+    margin-top: 2px;
+    color: #666;
+    font-size: 12px;
+}
+
+.promosi-status-badge {
+    min-width: 116px;
+    height: 42px;
+    display: inline-grid;
+    place-items: center;
+    padding: 0 18px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.promosi-status-badge.waiting {
+    background: #fff0d9;
+    color: #946014;
+}
+
+.promosi-status-badge.active {
+    background: #dff7ef;
+    color: #08745c;
+}
+
+.promosi-status-badge.rejected {
+    background: #fde8e8;
+    color: #b52828;
+}
+
+.promosi-status-badge.finished {
+    background: #72f786;
+    color: #16711d;
+}
+
+.promosi-status-badge.default {
+    background: #eeeeee;
+    color: #444;
+}
+
+.promosi-empty {
+    height: 260px;
+    color: #666;
+    text-align: center !important;
+    font-weight: 500 !important;
+}
+
+.promosi-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.promosi-action {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 5px;
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.promosi-action.verify {
+    background: #287d2d;
+}
+
+.promosi-action.delete {
+    background: #d92f2f;
+}
+
+.promosi-action svg,
+.promosi-action img,
+.promosi-page svg,
+.promosi-delete-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.promosi-action svg,
+.promosi-page svg,
+.promosi-delete-icon svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.promosi-footer {
+    min-height: 106px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: auto;
+    padding: 29px 34px 25px;
+}
+
+.promosi-footer p {
+    margin: 0;
+    color: #111;
+    font-size: 17px;
+}
+
+.promosi-pagination {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.promosi-page {
+    min-width: 36px;
+    height: 36px;
+    display: inline-grid;
+    place-items: center;
+    padding: 0 10px;
+    border-radius: 4px;
+    background: #287d2d;
+    color: #fff;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.promosi-page.is-active {
+    background: #1f6f26;
+}
+
+.promosi-page.is-disabled {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+.promosi-delete-modal[hidden] {
+    display: none;
+}
+
+.promosi-delete-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+}
+
+.promosi-delete-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.32);
+}
+
+.promosi-delete-dialog {
+    width: min(100%, 279px);
+    position: relative;
+    z-index: 1;
+    padding: 33px 31px;
+    border-radius: 12px;
+    background: #fff;
+    text-align: center;
+    color: #252525;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.promosi-delete-icon {
+    width: 80px;
+    height: 80px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: #df2f35;
+    color: #fff;
+}
+
+.promosi-delete-icon svg {
+    width: 41px;
+    height: 41px;
+}
+
+.promosi-delete-dialog h2 {
+    margin: 0 0 16px;
+    color: #252525;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.promosi-delete-dialog p {
+    margin: 0 0 25px;
+    color: #252525;
+    font-size: 18px;
+    line-height: 1.3;
+}
+
+.promosi-delete-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+}
+
+.promosi-delete-actions form {
+    margin: 0;
+}
+
+.promosi-delete-cancel,
+.promosi-delete-confirm {
+    min-width: 102px;
+    height: 27px;
+    border-radius: 5px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.promosi-delete-cancel {
+    border: 1px solid #287d2d;
+    background: #fff;
+    color: #287d2d;
+}
+
+.promosi-delete-confirm {
+    border: 0;
+    background: #df2f35;
+    color: #fff;
+}
+
+@media (max-width: 900px) {
+    .promosi-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}

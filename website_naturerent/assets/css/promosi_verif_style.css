@@ -1,0 +1,312 @@
+.promosi-verify-card {
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.promosi-verify-card form {
+    margin: 0;
+}
+
+.promosi-verify-body {
+    padding: 33px 51px 48px;
+}
+
+.promosi-verify-intro {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin: 0 0 18px 6px;
+}
+
+.promosi-verify-icon {
+    width: 85px;
+    height: 85px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 85px;
+    border-radius: 50%;
+    background: #e6f2e7;
+    color: #287d2d;
+}
+
+.promosi-verify-icon img {
+    width: 43px;
+    height: 43px;
+    object-fit: contain;
+}
+
+.promosi-verify-intro h2 {
+    margin: 0 0 4px;
+    color: #252525;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.promosi-verify-intro p {
+    margin: 0;
+    color: #343434;
+    font-size: 17px;
+}
+
+.promosi-verify-alert {
+    margin-inline: 0;
+    margin-bottom: 18px;
+}
+
+.promosi-verify-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
+    column-gap: 88px;
+    row-gap: 18px;
+}
+
+.promosi-info-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    color: #252525;
+    font-size: 20px;
+    font-weight: 400;
+}
+
+.promosi-info-box {
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    gap: 17px;
+    padding: 0 17px;
+    border: 1px solid #287d2d;
+    border-radius: 5px;
+    background: #fff;
+    color: #111;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.promosi-info-box svg {
+    width: 23px;
+    height: 23px;
+    flex: 0 0 23px;
+    fill: none;
+    stroke: #287d2d;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.promosi-proof-link:hover {
+    background: #f5fbf5;
+}
+
+.promosi-proof-preview {
+    grid-column: 2;
+    margin-top: 18px;
+}
+
+.promosi-proof-preview span {
+    display: block;
+    margin-bottom: 8px;
+    color: #252525;
+    font-size: 20px;
+}
+
+.promosi-proof-preview a {
+    width: min(100%, 420px);
+    display: block;
+    overflow: hidden;
+    border: 1px solid #287d2d;
+    border-radius: 7px;
+    background: #f7f7f7;
+}
+
+.promosi-proof-preview img {
+    width: 100%;
+    height: 236px;
+    display: block;
+    object-fit: cover;
+}
+
+.promosi-status-section {
+    margin-top: 22px;
+}
+
+.promosi-status-section h3 {
+    margin: 0 0 16px;
+    color: #252525;
+    font-size: 20px;
+    font-weight: 400;
+}
+
+.promosi-status-input {
+    position: fixed;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.promosi-status-option {
+    width: 100%;
+    min-height: 71px;
+    display: grid;
+    grid-template-columns: 39px 1fr 128px;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 19px;
+    padding: 13px 19px;
+    border: 1px solid #287d2d;
+    border-radius: 7px;
+    background: #fff;
+    color: #252525;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.promosi-status-input:checked + .promosi-status-option {
+    background: #c8ebcc;
+}
+
+.promosi-status-radio {
+    width: 35px;
+    height: 35px;
+    display: grid;
+    place-items: center;
+    border: 2px solid #252525;
+    border-radius: 50%;
+}
+
+.promosi-status-input:checked + .promosi-status-option .promosi-status-radio {
+    border-color: #287d2d;
+}
+
+.promosi-status-input:checked + .promosi-status-option .promosi-status-radio::after {
+    content: "";
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #287d2d;
+}
+
+.promosi-status-copy {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.promosi-status-copy strong {
+    color: #252525;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.15;
+}
+
+.promosi-status-copy small {
+    color: #333;
+    font-size: 13px;
+    line-height: 1.3;
+}
+
+.promosi-status-pill {
+    width: 128px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    justify-self: end;
+    border-radius: 5px;
+    font-size: 13px;
+}
+
+.promosi-status-option.waiting .promosi-status-pill {
+    background: #fff0d9;
+    color: #946014;
+}
+
+.promosi-status-option.active .promosi-status-pill {
+    background: #e7f8f2;
+    color: #287d2d;
+}
+
+.promosi-status-option.rejected .promosi-status-pill {
+    background: #fde8e8;
+    color: #b52828;
+}
+
+.promosi-status-option.finished .promosi-status-pill {
+    background: #72f786;
+    color: #16711d;
+}
+
+.promosi-verify-actions {
+    min-height: 132px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 32px 43px;
+    border-top: 1px solid #d6d6d6;
+}
+
+.promosi-cancel-button,
+.promosi-save-button {
+    min-width: 123px;
+    height: 41px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 24px;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 400;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.promosi-cancel-button {
+    border: 1px solid #287d2d;
+    background: #fff;
+    color: #287d2d;
+}
+
+.promosi-save-button {
+    min-width: 238px;
+    gap: 10px;
+    border: 0;
+    background: #287d2d;
+    color: #fff;
+}
+
+.promosi-save-button span {
+    font-size: 27px;
+    line-height: 1;
+}
+
+@media (max-width: 900px) {
+    .promosi-verify-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .promosi-proof-preview {
+        grid-column: 1;
+    }
+
+    .promosi-verify-body {
+        padding-inline: 24px;
+    }
+
+    .promosi-verify-actions {
+        align-items: stretch;
+        flex-direction: column-reverse;
+        padding-inline: 24px;
+    }
+
+    .promosi-cancel-button,
+    .promosi-save-button {
+        width: 100%;
+    }
+}

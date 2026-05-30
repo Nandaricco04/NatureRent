@@ -28,8 +28,12 @@ $userAction = $_GET['action'] ?? '';
 
 if ($page === 'users' && $userAction === 'add') {
     $breadcrumbTitle .= ' / TambahUser';
+    $pageTitle = 'Tambah User';
 } elseif ($page === 'users' && $userAction === 'edit') {
     $breadcrumbTitle .= ' / EditUser';
+    $pageTitle = 'Edit User';
+} elseif ($page === 'promosi' && $userAction === 'verif') {
+    $pageTitle = 'Verifikasi Promosi Iklan';
 }
 ?>
 <!DOCTYPE html>
@@ -44,6 +48,12 @@ if ($page === 'users' && $userAction === 'add') {
     <?php endif; ?>
     <?php if ($page === 'banner'): ?>
         <link rel="stylesheet" href="assets/css/banner_style.css">
+    <?php endif; ?>
+    <?php if ($page === 'promosi'): ?>
+        <link rel="stylesheet" href="assets/css/promosi_style.css">
+    <?php endif; ?>
+    <?php if ($page === 'promosi' && $userAction === 'verif'): ?>
+        <link rel="stylesheet" href="assets/css/promosi_verif_style.css">
     <?php endif; ?>
 </head>
 <body>
@@ -75,6 +85,8 @@ if ($page === 'users' && $userAction === 'add') {
                 $pageFile = __DIR__ . '/pages/user_add.php';
             } elseif ($page === 'users' && $userAction === 'edit') {
                 $pageFile = __DIR__ . '/pages/user_edit.php';
+            } elseif ($page === 'promosi' && $userAction === 'verif') {
+                $pageFile = __DIR__ . '/pages/promosi_verif.php';
             }
 
             if (is_file($pageFile)) {
@@ -93,6 +105,9 @@ if ($page === 'users' && $userAction === 'add') {
     <script src="assets/js/script.js?v=<?= filemtime(__DIR__ . '/assets/js/script.js') ?>"></script>
     <?php if ($page === 'banner'): ?>
         <script src="assets/js/banner_script.js?v=<?= filemtime(__DIR__ . '/assets/js/banner_script.js') ?>"></script>
+    <?php endif; ?>
+    <?php if ($page === 'promosi'): ?>
+        <script src="assets/js/promosi_script.js?v=<?= filemtime(__DIR__ . '/assets/js/promosi_script.js') ?>"></script>
     <?php endif; ?>
 </body>
 </html>

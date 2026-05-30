@@ -88,7 +88,7 @@ function userPageUrl(int $page, string $keyword): string
                     placeholder="Cari user dari nama atau email"
                 >
             </label>
-            <a class="primary-button add-user-link" href="index.php?page=users&action=add">Tambah User +</a>
+            <a class="primary-button add-user-link" href="index.php?page=users&action=add">+ Tambah User</a>
         </form>
     </div>
 
