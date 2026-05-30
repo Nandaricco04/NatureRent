@@ -34,7 +34,14 @@ if ($page === 'users' && $userAction === 'add') {
     $pageTitle = 'Edit User';
 } elseif ($page === 'promosi' && $userAction === 'verif') {
     $pageTitle = 'Verifikasi Promosi Iklan';
+} elseif ($page === 'informasi' && $userAction === 'add') {
+    $breadcrumbTitle .= ' / TambahInformasi';
+    $pageTitle = 'Tambah Informasi';
+} elseif ($page === 'informasi' && $userAction === 'edit') {
+    $breadcrumbTitle .= ' / EditInformasi';
+    $pageTitle = 'Edit Informasi';
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -55,6 +62,10 @@ if ($page === 'users' && $userAction === 'add') {
     <?php if ($page === 'promosi' && $userAction === 'verif'): ?>
         <link rel="stylesheet" href="assets/css/promosi_verif_style.css">
     <?php endif; ?>
+    <?php if ($page === 'informasi'): ?>
+    <link rel="stylesheet" href="assets/css/informasi_style.css">
+    <?php endif; ?>
+
 </head>
 <body>
     <div class="admin-shell">
@@ -87,8 +98,12 @@ if ($page === 'users' && $userAction === 'add') {
                 $pageFile = __DIR__ . '/pages/user_edit.php';
             } elseif ($page === 'promosi' && $userAction === 'verif') {
                 $pageFile = __DIR__ . '/pages/promosi_verif.php';
+            } elseif ($page === 'informasi' && $userAction === 'add') {
+                $pageFile = __DIR__ . '/pages/informasi_add.php';
+            } elseif ($page === 'informasi' && $userAction === 'edit') {
+                $pageFile = __DIR__ . '/pages/informasi_edit.php';
             }
-
+            
             if (is_file($pageFile)) {
                 include $pageFile;
             } else {
