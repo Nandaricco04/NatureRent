@@ -19,7 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (in_array($newStatus, $allowed, true)) {
         $result = updateOwnerStatus($ownerId, $newStatus);
         if ($result['ok']) {
-            $successMsg = 'Status verifikasi berhasil diperbarui.';
+            header('Location: index.php?page=owners');
+            exit;
         } else {
             $errorMsg = 'Gagal memperbarui status. Silakan coba lagi.';
         }

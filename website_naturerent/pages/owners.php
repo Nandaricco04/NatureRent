@@ -72,7 +72,7 @@ function statusBadge(string $status): string
         </div>
         <p class="owner-stat-label">Terverifikasi</p>
         <p class="owner-stat-value"><?= $counts['approved'] ?></p>
-        <p class="owner-stat-sub">Aktif berjualan</p>
+        <p class="owner-stat-sub">Aktif menyewakan alat</p>
     </div>
 
     <div class="owner-stat-card">
