@@ -2,7 +2,6 @@
 require_once __DIR__ . '/../repositories/owner_repository.php';
 require_once __DIR__ . '/../config/supabase.php';
 
-// ── Ambil ID owner dari URL ────────────────────────────────────────────────
 $ownerId = (int) ($_GET['id'] ?? 0);
 
 if ($ownerId <= 0) {
@@ -10,7 +9,6 @@ if ($ownerId <= 0) {
     exit;
 }
 
-// ── Handle simpan status verifikasi ───────────────────────────────────────
 $successMsg = '';
 $errorMsg   = '';
 
@@ -30,7 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// ── Ambil data owner ───────────────────────────────────────────────────────
 $owner = findOwnerById($ownerId);
 
 if ($owner === null) {
@@ -41,7 +38,6 @@ if ($owner === null) {
 $currentStatus = strtolower($owner['status_verifikasi'] ?? 'pending');
 $namaKota      = $owner['lokasi']['nama_kota'] ?? '-';
 
-// ── Helper: public URL foto dari Supabase Storage ──────────────────────────
 function fotoPublicUrl(?string $path): string
 {
     if (empty($path)) return '';
@@ -49,7 +45,6 @@ function fotoPublicUrl(?string $path): string
     return rtrim(SUPABASE_URL, '/') . '/storage/v1/object/public/dokumen-owner/' . ltrim($path, '/');
 }
 
-// ── Helper: render field readonly ─────────────────────────────────────────
 function verifField(string $label, string $value, string $icon): string
 {
     $val = htmlspecialchars($value ?: '-');
@@ -64,7 +59,6 @@ function verifField(string $label, string $value, string $icon): string
     HTML;
 }
 
-// ── Helper: render field foto ──────────────────────────────────────────────
 function verifFotoField(string $label, ?string $path, string $icon): string
 {
     $url     = fotoPublicUrl($path);
@@ -98,7 +92,6 @@ function verifFotoField(string $label, ?string $path, string $icon): string
 
 <div class="verif-wrap">
 
-    <!-- ── Header ── -->
     <div class="verif-header">
         <div class="verif-header-icon">
             <iconify-icon icon="tabler:building-store"></iconify-icon>
@@ -109,7 +102,6 @@ function verifFotoField(string $label, ?string $path, string $icon): string
         </div>
     </div>
 
-    <!-- ── Alert ── -->
     <?php if ($successMsg): ?>
         <div class="verif-alert success"><?= htmlspecialchars($successMsg) ?></div>
     <?php endif; ?>
@@ -119,7 +111,6 @@ function verifFotoField(string $label, ?string $path, string $icon): string
 
     <form method="POST" action="index.php?page=owners&action=detail&id=<?= $ownerId ?>">
 
-        <!-- ── Info Toko ── -->
         <div class="verif-grid">
             <?= verifField('Nama Toko',      $owner['nama_toko']      ?? '', 'tabler:building-store') ?>
             <?= verifField('No Telepon',     $owner['nomor_telepon']  ?? '', 'tabler:phone') ?>
@@ -130,7 +121,6 @@ function verifFotoField(string $label, ?string $path, string $icon): string
             <?= verifField('Alamat', $owner['alamat'] ?? '', 'tabler:map-pin') ?>
         </div>
 
-        <!-- ── Dokumen ── -->
         <hr class="verif-divider">
         <p class="verif-section-title">Dokumen</p>
         <div class="verif-grid">
@@ -140,7 +130,6 @@ function verifFotoField(string $label, ?string $path, string $icon): string
             <?= verifFotoField('Foto NIB',          $owner['foto_nib']          ?? '', 'tabler:license') ?>
         </div>
 
-        <!-- ── Data Keuangan ── -->
         <hr class="verif-divider">
         <p class="verif-section-title">Data Keuangan</p>
         <div class="verif-grid">
@@ -148,7 +137,6 @@ function verifFotoField(string $label, ?string $path, string $icon): string
             <?= verifField('Nomor Rekening', $owner['nomor_rekening'] ?? '', 'tabler:credit-card') ?>
         </div>
 
-        <!-- ── Status Verifikasi ── -->
         <hr class="verif-divider">
         <p class="verif-section-title">Status Verifikasi</p>
 
@@ -194,7 +182,6 @@ function verifFotoField(string $label, ?string $path, string $icon): string
             </label>
         </div>
 
-        <!-- ── Footer ── -->
         <div class="verif-footer">
             <a href="index.php?page=owners" class="verif-btn-batal">Batal</a>
             <button type="submit" class="verif-btn-simpan">

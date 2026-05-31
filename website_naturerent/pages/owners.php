@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . '/../repositories/owner_repository.php';
 
-// ── Handle aksi toggle nonaktif/aktif ─────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action  = $_POST['action'] ?? '';
     $ownerId = (int) ($_POST['owner_id'] ?? 0);
@@ -18,11 +17,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// ── Ambil data ─────────────────────────────────────────────────────────────
 $owners = getAllOwners();
 $counts = countOwnerByStatus();
 
-// ── Filter pencarian ───────────────────────────────────────────────────────
 $search = strtolower(trim($_GET['search'] ?? ''));
 if ($search !== '') {
     $owners = array_values(array_filter($owners, function ($o) use ($search) {
@@ -32,7 +29,6 @@ if ($search !== '') {
     }));
 }
 
-// ── Pagination ─────────────────────────────────────────────────────────────
 $perPage     = 5;
 $totalData   = count($owners);
 $totalPages  = max(1, (int) ceil($totalData / $perPage));
@@ -40,7 +36,6 @@ $currentPage = max(1, min((int) ($_GET['p'] ?? 1), $totalPages));
 $offset      = ($currentPage - 1) * $perPage;
 $pageOwners  = array_slice($owners, $offset, $perPage);
 
-// ── Helper URL pagination ──────────────────────────────────────────────────
 function ownerPageUrl(int $page, string $keyword): string
 {
     $params = ['page' => 'owners', 'p' => $page];
@@ -48,7 +43,6 @@ function ownerPageUrl(int $page, string $keyword): string
     return 'index.php?' . http_build_query($params);
 }
 
-// ── Helper status badge ────────────────────────────────────────────────────
 function statusBadge(string $status): string
 {
     $map = [
@@ -68,7 +62,6 @@ function statusBadge(string $status): string
 }
 ?>
 
-<!-- ── Stat Cards ── -->
 <div class="owner-stat-grid">
     <div class="owner-stat-card">
         <div class="owner-stat-top">
@@ -119,7 +112,6 @@ function statusBadge(string $status): string
     </div>
 </div>
 
-<!-- ── Tabel Daftar Pemilik Rental ── -->
 <div class="owner-table-card">
     <div class="owner-table-header">
         <h2 class="owner-table-title">Daftar Pemilik Rental</h2>
@@ -138,6 +130,7 @@ function statusBadge(string $status): string
         </form>
     </div>
 
+    <div class="owner-table-wrap">
     <table class="owner-table">
         <thead>
             <tr>
@@ -205,8 +198,8 @@ function statusBadge(string $status): string
             <?php endif; ?>
         </tbody>
     </table>
+    </div>
 
-    <!-- ── Pagination ── -->
     <div class="owner-pagination-wrap">
         <span>
             Menampilkan <?= $totalData === 0 ? 0 : $offset + 1 ?>–<?= min($offset + $perPage, $totalData) ?>
@@ -233,7 +226,6 @@ function statusBadge(string $status): string
     </div>
 </div>
 
-<!-- ── Modal Konfirmasi ── -->
 <div class="owner-modal-overlay" id="ownerModalOverlay">
     <div class="owner-modal-box">
         <div class="owner-modal-icon" id="ownerModalIcon" style="background:#F1EFE8;color:#5F5E5A;">

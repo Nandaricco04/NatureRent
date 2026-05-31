@@ -1,7 +1,3 @@
-/* ============================================================
-   owners_script.js — Owner Management
-   ============================================================ */
-
 function ownerShowModal(ownerId, action) {
     document.getElementById('ownerModalId').value     = ownerId;
     document.getElementById('ownerModalAction').value = action;
@@ -36,7 +32,6 @@ function ownerCloseModal() {
     document.getElementById('ownerModalOverlay').classList.remove('show');
 }
 
-// Tutup modal saat klik di luar
 document.addEventListener('DOMContentLoaded', function () {
     const overlay = document.getElementById('ownerModalOverlay');
     if (overlay) {
