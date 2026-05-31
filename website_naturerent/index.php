@@ -32,6 +32,9 @@ if ($page === 'users' && $userAction === 'add') {
 } elseif ($page === 'users' && $userAction === 'edit') {
     $breadcrumbTitle .= ' / EditUser';
     $pageTitle = 'Edit User';
+} elseif ($page === 'owners' && $userAction === 'detail') {
+    $breadcrumbTitle .= ' / Verifikasi Owner';
+    $pageTitle = 'Verifikasi Owner';
 } elseif ($page === 'promosi' && $userAction === 'verif') {
     $pageTitle = 'Verifikasi Promosi Iklan';
 } elseif ($page === 'informasi' && $userAction === 'add') {
@@ -53,6 +56,12 @@ if ($page === 'users' && $userAction === 'add') {
     <?php if ($page === 'users'): ?>
         <link rel="stylesheet" href="assets/css/user_style.css">
     <?php endif; ?>
+    <?php if ($page === 'owners'): ?>
+        <link rel="stylesheet" href="assets/css/owners_style.css">
+    <?php endif; ?>
+    <?php if ($page === 'owners' && $userAction === 'detail'): ?>
+        <link rel="stylesheet" href="assets/css/owner_verif_style.css">
+    <?php endif; ?>
     <?php if ($page === 'banner'): ?>
         <link rel="stylesheet" href="assets/css/banner_style.css">
     <?php endif; ?>
@@ -66,6 +75,7 @@ if ($page === 'users' && $userAction === 'add') {
     <link rel="stylesheet" href="assets/css/informasi_style.css">
     <?php endif; ?>
 
+    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
 </head>
 <body>
     <div class="admin-shell">
@@ -96,6 +106,8 @@ if ($page === 'users' && $userAction === 'add') {
                 $pageFile = __DIR__ . '/pages/user_add.php';
             } elseif ($page === 'users' && $userAction === 'edit') {
                 $pageFile = __DIR__ . '/pages/user_edit.php';
+            } elseif ($page === 'owners' && $userAction === 'detail') {
+                $pageFile = __DIR__ . '/pages/owner_verif.php';
             } elseif ($page === 'promosi' && $userAction === 'verif') {
                 $pageFile = __DIR__ . '/pages/promosi_verif.php';
             } elseif ($page === 'informasi' && $userAction === 'add') {
@@ -118,6 +130,12 @@ if ($page === 'users' && $userAction === 'add') {
         </main>
     </div>
     <script src="assets/js/script.js?v=<?= filemtime(__DIR__ . '/assets/js/script.js') ?>"></script>
+    <?php if ($page === 'owners'): ?>
+        <script src="assets/js/owners_script.js"></script>
+    <?php endif; ?>
+    <?php if ($page === 'owners' && $userAction === 'detail'): ?>
+        <script src="assets/js/owner_verif_script.js"></script>
+    <?php endif; ?>
     <?php if ($page === 'banner'): ?>
         <script src="assets/js/banner_script.js?v=<?= filemtime(__DIR__ . '/assets/js/banner_script.js') ?>"></script>
     <?php endif; ?>
