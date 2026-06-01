@@ -12,6 +12,7 @@ class UserKeranjangPage extends StatefulWidget {
     this.popCheckoutOnBack = false,
     this.checkoutBackSignal = 0,
     this.onCheckoutModeChanged,
+    this.onCheckoutComplete,
   });
 
   final dynamic initialSelectedCartId;
@@ -19,6 +20,7 @@ class UserKeranjangPage extends StatefulWidget {
   final bool popCheckoutOnBack;
   final int checkoutBackSignal;
   final ValueChanged<bool>? onCheckoutModeChanged;
+  final VoidCallback? onCheckoutComplete;
 
   @override
   State<UserKeranjangPage> createState() => _UserKeranjangPageState();
@@ -34,9 +36,11 @@ class _UserKeranjangPageState extends State<UserKeranjangPage> {
   List<Map<String, dynamic>> carts = [];
   bool isLoading = true;
   bool isCheckingOut = false;
+  bool isUploadingProof = false;
   bool showCheckout = false;
   bool _initialCheckoutApplied = false;
-  String paymentMethod = 'qris';
+  String paymentMethod = '';
+  String? buktiPembayaranUrl;
 
   List<Map<String, dynamic>> get selectedCarts {
     return carts
@@ -113,6 +117,14 @@ class _UserKeranjangPageState extends State<UserKeranjangPage> {
 
   Future<void> _checkout() async {
     if (selectedCarts.isEmpty || isCheckingOut) return;
+    if (paymentMethod.isEmpty) {
+      _showMessage('Pilih metode pembayaran dulu');
+      return;
+    }
+    if (paymentMethod == 'qris' && buktiPembayaranUrl == null) {
+      _showMessage('Upload bukti pembayaran QRIS dulu');
+      return;
+    }
 
     setState(() => isCheckingOut = true);
 
@@ -123,17 +135,21 @@ class _UserKeranjangPageState extends State<UserKeranjangPage> {
         subtotalSewa: subtotalSewa,
         pajak: pajak,
         totalHarga: totalHarga,
+        buktiPembayaran: paymentMethod == 'qris' ? buktiPembayaranUrl : null,
       );
 
       if (!mounted) return;
       setState(() {
         selectedCartIds.clear();
+        paymentMethod = '';
+        buktiPembayaranUrl = null;
         _setCheckoutMode(false);
         isCheckingOut = false;
       });
       await _getKeranjang();
 
       _showMessage('Checkout berhasil: $kode');
+      widget.onCheckoutComplete?.call();
     } on UserKeranjangException catch (e) {
       if (!mounted) return;
       setState(() => isCheckingOut = false);
@@ -144,6 +160,35 @@ class _UserKeranjangPageState extends State<UserKeranjangPage> {
       if (!mounted) return;
       setState(() => isCheckingOut = false);
       _showMessage('Checkout gagal: $e');
+    }
+  }
+
+  Future<void> _pickPaymentProof() async {
+    if (isUploadingProof) return;
+
+    setState(() => isUploadingProof = true);
+
+    try {
+      final proofUrl = await _service.pickAndUploadPaymentProof();
+      if (!mounted) return;
+
+      setState(() {
+        if (proofUrl != null) buktiPembayaranUrl = proofUrl;
+        isUploadingProof = false;
+      });
+
+      if (proofUrl != null) {
+        _showMessage('Bukti pembayaran berhasil diupload');
+      }
+    } on UserKeranjangException catch (e) {
+      if (!mounted) return;
+      setState(() => isUploadingProof = false);
+      _showMessage(e.message);
+    } catch (e) {
+      debugPrint('ERROR UPLOAD BUKTI CHECKOUT: $e');
+      if (!mounted) return;
+      setState(() => isUploadingProof = false);
+      _showMessage('Gagal upload bukti pembayaran');
     }
   }
 
@@ -188,6 +233,8 @@ class _UserKeranjangPageState extends State<UserKeranjangPage> {
       }
       if (selectedCartIds.isEmpty) showCheckout = false;
       if (selectedCartIds.isEmpty) _setCheckoutMode(false);
+      if (selectedCartIds.isEmpty) buktiPembayaranUrl = null;
+      if (selectedCartIds.isEmpty) paymentMethod = '';
     });
   }
 
@@ -267,10 +314,12 @@ class _UserKeranjangPageState extends State<UserKeranjangPage> {
                 pajak: pajak,
                 totalHarga: totalHarga,
                 paymentMethod: paymentMethod,
+                buktiPembayaranUrl: buktiPembayaranUrl,
                 isCheckingOut: isCheckingOut,
+                isUploadingProof: isUploadingProof,
                 onBack: _handleCheckoutBack,
-                onPaymentChanged: (value) =>
-                    setState(() => paymentMethod = value),
+                onPaymentChanged: _handlePaymentChanged,
+                onPickPaymentProof: _pickPaymentProof,
                 onQuantityChanged: _handleCheckoutQuantityChanged,
                 onCheckout: _checkout,
               )
@@ -301,5 +350,66 @@ class _UserKeranjangPageState extends State<UserKeranjangPage> {
     }
 
     setState(() => _setCheckoutMode(false));
+  }
+
+  Future<void> _handlePaymentChanged(String value) async {
+    if (value == 'qris' && paymentMethod != 'qris') {
+      final confirmed = await _showQrisPolicyDialog();
+      if (!confirmed) return;
+    }
+
+    if (!mounted) return;
+    setState(() {
+      paymentMethod = value;
+      if (value != 'qris') buktiPembayaranUrl = null;
+    });
+  }
+
+  Future<bool> _showQrisPolicyDialog() async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'Ketentuan QRIS',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: const Text(
+            'Pesanan yang sudah dibayar menggunakan QRIS tidak dapat dibatalkan oleh penyewa. Dana yang sudah dibayarkan tidak dapat dikembalikan.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF297B2D),
+                side: const BorderSide(color: Color(0xFF297B2D)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 22,
+                  vertical: 10,
+                ),
+              ),
+              child: const Text('Kembali'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF297B2D),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Saya Mengerti'),
+            ),
+          ],
+        );
+      },
+    );
+
+    return result ?? false;
   }
 }

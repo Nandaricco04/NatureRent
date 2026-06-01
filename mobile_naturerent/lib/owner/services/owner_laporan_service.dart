@@ -33,11 +33,17 @@ class LaporanService {
     final awal = _dateOnly(DateTime(month.year, month.month, 1));
     final akhir = _dateOnly(DateTime(month.year, month.month + 1, 1));
 
-    final items = await _fetchOwnerTransactionItems(
+    final fetchedItems = await _fetchOwnerTransactionItems(
       ownerId: ownerId,
       startDate: awal,
       endDate: akhir,
     );
+    final items = fetchedItems.where((row) {
+      final transaksi = row['transaksi'];
+      if (transaksi is! Map) return true;
+      final status = _normalizedStatus(transaksi['status_pesanan']);
+      return status != 'dibatalkan' && status != 'batal';
+    }).toList();
 
     final transactionIds = items
         .map((row) => row['transaksi_id']?.toString())
@@ -75,7 +81,7 @@ class LaporanService {
           .from('transaksi_item')
           .select(
             'id_transaksi_item, transaksi_id, jumlah, subtotal, '
-            'transaksi!inner(user_id, tanggal_transaksi), '
+            'transaksi!inner(user_id, tanggal_transaksi, status_pesanan), '
             'products!inner(owner_id)',
           )
           .eq('products.owner_id', ownerId)
@@ -90,7 +96,7 @@ class LaporanService {
           .from('transaksi_item')
           .select(
             'id_transaksi_item, transaksi_id, jumlah, subtotal_sewa, '
-            'transaksi!inner(user_id, tanggal_transaksi), '
+            'transaksi!inner(user_id, tanggal_transaksi, status_pesanan), '
             'products!inner(owner_id)',
           )
           .eq('products.owner_id', ownerId)
@@ -118,5 +124,12 @@ class LaporanService {
   double _readDouble(dynamic value) {
     if (value is num) return value.toDouble();
     return double.tryParse((value ?? '0').toString()) ?? 0;
+  }
+
+  String _normalizedStatus(dynamic value) {
+    return (value ?? '').toString().trim().toLowerCase().replaceAll(
+      RegExp(r'[\s-]+'),
+      '_',
+    );
   }
 }

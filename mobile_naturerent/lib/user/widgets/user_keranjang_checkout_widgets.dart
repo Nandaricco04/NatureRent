@@ -10,9 +10,12 @@ class UserKeranjangCheckoutView extends StatelessWidget {
     required this.pajak,
     required this.totalHarga,
     required this.paymentMethod,
+    required this.buktiPembayaranUrl,
     required this.isCheckingOut,
+    required this.isUploadingProof,
     required this.onBack,
     required this.onPaymentChanged,
+    required this.onPickPaymentProof,
     required this.onQuantityChanged,
     required this.onCheckout,
   });
@@ -25,9 +28,12 @@ class UserKeranjangCheckoutView extends StatelessWidget {
   final int pajak;
   final int totalHarga;
   final String paymentMethod;
+  final String? buktiPembayaranUrl;
   final bool isCheckingOut;
+  final bool isUploadingProof;
   final VoidCallback onBack;
   final ValueChanged<String> onPaymentChanged;
+  final VoidCallback onPickPaymentProof;
   final void Function(Map<String, dynamic> item, int quantity)
   onQuantityChanged;
   final VoidCallback onCheckout;
@@ -46,6 +52,12 @@ class UserKeranjangCheckoutView extends StatelessWidget {
               _buildPaymentMethod(),
               const SizedBox(height: 14),
               _buildSummaryCard(),
+              if (paymentMethod == 'qris') ...[
+                const SizedBox(height: 24),
+                _buildQrisBox(),
+                const SizedBox(height: 24),
+                _buildProofPicker(),
+              ],
             ],
           ),
         ),
@@ -366,6 +378,12 @@ class UserKeranjangCheckoutView extends StatelessWidget {
   }
 
   Widget _buildCheckoutBar() {
+    final canCheckout =
+        !isCheckingOut &&
+        !isUploadingProof &&
+        paymentMethod.isNotEmpty &&
+        (paymentMethod != 'qris' || buktiPembayaranUrl != null);
+
     return Container(
       padding: const EdgeInsets.fromLTRB(30, 16, 30, 18),
       decoration: const BoxDecoration(
@@ -394,7 +412,7 @@ class UserKeranjangCheckoutView extends StatelessWidget {
             width: double.infinity,
             height: 52,
             child: ElevatedButton(
-              onPressed: null,
+              onPressed: canCheckout ? onCheckout : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: _green,
                 disabledBackgroundColor: _green.withValues(alpha: 0.45),
@@ -427,6 +445,181 @@ class UserKeranjangCheckoutView extends StatelessWidget {
     );
   }
 
+  Widget _buildQrisBox() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: _green, width: 2),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            decoration: const BoxDecoration(
+              color: Color(0xFFEAF7EC),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+            ),
+            child: const Text(
+              'Scan QR Code',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: _green,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Container(
+            width: 158,
+            height: 158,
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: const Color(0xFFE7E1D8), width: 2),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Image.asset('assets/images/Qris.jpeg', fit: BoxFit.contain),
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            'Total yang dibayar',
+            style: TextStyle(color: Color(0xFF9A9792), fontSize: 12),
+          ),
+          Text(
+            _formatRp(totalHarga),
+            style: const TextStyle(
+              color: _green,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 18),
+          Container(
+            width: 258,
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF2EFE8),
+              borderRadius: BorderRadius.circular(13),
+            ),
+            child: const Column(
+              children: [
+                _PaymentStep(
+                  number: '1',
+                  text: 'Buka aplikasi e-wallet atau\nm-banking kamu',
+                ),
+                SizedBox(height: 12),
+                _PaymentStep(
+                  number: '2',
+                  text: 'Pilih menu Scan / QRIS lalu scan kode di atas',
+                ),
+                SizedBox(height: 12),
+                _PaymentStep(number: '3', text: 'Konfirmasi pembayaran'),
+                SizedBox(height: 12),
+                _PaymentStep(number: '4', text: 'Upload bukti tf dibawah'),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProofPicker() {
+    final uploaded = buktiPembayaranUrl != null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Bukti Pembayaran',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        ),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: isUploadingProof ? null : onPickPaymentProof,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            width: double.infinity,
+            height: 50,
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: _green),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                if (isUploadingProof)
+                  const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      color: _green,
+                      strokeWidth: 2,
+                    ),
+                  )
+                else
+                  Icon(
+                    uploaded ? Icons.check_circle : Icons.upload_file,
+                    color: uploaded ? _green : Colors.black87,
+                  ),
+                const SizedBox(width: 10),
+                Text(
+                  isUploadingProof
+                      ? 'Mengupload...'
+                      : uploaded
+                      ? 'Bukti sudah diupload'
+                      : 'Upload File',
+                  style: TextStyle(
+                    color: uploaded ? _green : Colors.black87,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (uploaded) ...[
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              width: double.infinity,
+              height: 132,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: const Color(0xFFD9D5CF)),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Image.network(
+                buktiPembayaranUrl!,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Center(
+                    child: Text(
+                      'Preview bukti tidak bisa dimuat',
+                      style: TextStyle(
+                        color: Color(0xFF8A8793),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
   String _formatRp(num value) {
     return NumberFormat.currency(
       locale: 'id',
@@ -438,5 +631,55 @@ class UserKeranjangCheckoutView extends StatelessWidget {
   int _readInt(dynamic value) {
     if (value is num) return value.toInt();
     return int.tryParse((value ?? '0').toString()) ?? 0;
+  }
+}
+
+class _PaymentStep extends StatelessWidget {
+  const _PaymentStep({required this.number, required this.text});
+
+  final String number;
+  final String text;
+
+  static const _green = Color(0xFF297B2D);
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 24),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 21,
+            height: 21,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              color: _green,
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              number,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+                height: 1.22,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

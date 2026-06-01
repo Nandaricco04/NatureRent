@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'owner_edit_pesanan_page.dart';
+import 'owner_pajak_page.dart';
 import 'services/owner_home_service.dart';
 import 'widgets/owner_home_widgets.dart';
 
@@ -133,8 +135,8 @@ class _OwnerHomePageState extends State<OwnerHomePage> {
                   ),
                   OwnerHomeSummaryCard(
                     icon: Icons.payments_outlined,
-                    title: 'Pendapatan',
-                    value: _rupiah(_data.pendapatanBulanIni),
+                    title: 'Pendapatan Hari Ini',
+                    value: _rupiah(_data.pendapatanHariIni),
                     tint: const Color(0xFFEFF8F0),
                     color: _green,
                   ),
@@ -156,7 +158,11 @@ class _OwnerHomePageState extends State<OwnerHomePage> {
                 ..._data.pesananTerbaru.map(
                   (order) => Padding(
                     padding: const EdgeInsets.only(bottom: 10),
-                    child: OwnerHomeOrderTile(order: order),
+                    child: OwnerHomeOrderTile(
+                      order: order,
+                      onEdit: () => _openEditOrder(order),
+                      onTax: () => _openTaxOrder(order),
+                    ),
                   ),
                 ),
               const SizedBox(height: 12),
@@ -175,5 +181,46 @@ class _OwnerHomePageState extends State<OwnerHomePage> {
         ),
       ),
     );
+  }
+
+  Future<void> _openEditOrder(Map<String, dynamic> order) async {
+    final changed = await Navigator.push<dynamic>(
+      context,
+      MaterialPageRoute(builder: (_) => OwnerEditPesananPage(order: order)),
+    );
+
+    if (!mounted) return;
+
+    if (changed is Map) {
+      final updatedStatus = changed['status_pesanan'];
+      if (updatedStatus != null) {
+        setState(() {
+          order['status_pesanan'] = updatedStatus;
+        });
+      }
+      _loadHomeData();
+      return;
+    }
+
+    if (changed == true) _loadHomeData();
+  }
+
+  Future<void> _openTaxOrder(Map<String, dynamic> order) async {
+    final changed = await Navigator.push<dynamic>(
+      context,
+      MaterialPageRoute(builder: (_) => OwnerPajakPage(order: order)),
+    );
+
+    if (!mounted) return;
+    if (changed is Map) {
+      setState(() {
+        order['bukti_pajak'] = changed['bukti_pajak'];
+        order['status_pajak'] = changed['status_pajak'];
+      });
+      _loadHomeData();
+      return;
+    }
+
+    if (changed == true) _loadHomeData();
   }
 }

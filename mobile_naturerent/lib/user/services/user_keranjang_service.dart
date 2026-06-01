@@ -1,12 +1,17 @@
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../auth/session_manager.dart';
 
 class UserKeranjangService {
-  UserKeranjangService({SupabaseClient? client})
-    : _supabase = client ?? Supabase.instance.client;
+  UserKeranjangService({SupabaseClient? client, ImagePicker? picker})
+    : _supabase = client ?? Supabase.instance.client,
+      _picker = picker ?? ImagePicker();
 
   final SupabaseClient _supabase;
+  final ImagePicker _picker;
+
+  static const _proofBucket = 'bukti_pembayaran_sewa';
 
   Future<List<Map<String, dynamic>>> fetchCart() async {
     final userId = await currentUserId();
@@ -67,67 +72,117 @@ class UserKeranjangService {
     required int subtotalSewa,
     required int pajak,
     required int totalHarga,
+    String? buktiPembayaran,
   }) async {
     final userId = await currentUserId();
     if (userId == null) {
       throw const UserKeranjangException('User belum login');
     }
 
-    final transaksi = await _supabase
-        .from('transaksi')
-        .insert({
-          'user_id': userId,
-          'payment_method': paymentMethod,
-          'status_payment': 'pending',
-          'status_pesanan': 'menunggu_konfirmasi',
-          'subtotal_sewa': subtotalSewa,
-          'pajak': pajak,
-          'total_harga': totalHarga,
-        })
-        .select('id_transaksi, kode_transaksi')
-        .single();
-
-    final idTransaksi = transaksi['id_transaksi'];
-    final items = selectedCarts.map((item) {
-      final product = item['products'] as Map<String, dynamic>?;
-
-      return {
-        'id_transaksi': idTransaksi,
-        'product_id': item['product_id'],
-        'nama_produk': product?['name'] ?? 'Alat outdoor',
-        'tanggal_mulai': item['tanggal_mulai'],
-        'tanggal_kembali': item['tanggal_kembali'],
-        'total_hari': item['total_hari'],
-        'jumlah': item['jumlah'],
-        'harga_per_hari': item['harga_per_hari'],
-        'subtotal': item['subtotal'],
-      };
-    }).toList();
-
-    await _supabase.from('transaksi_item').insert(items);
-
-    for (final item in selectedCarts) {
-      await _supabase
-          .from('keranjang')
-          .delete()
-          .eq('id_keranjang', item['id_keranjang']);
+    final userIdInt = _readInt(userId);
+    if (userIdInt <= 0) {
+      throw const UserKeranjangException('Session user tidak valid');
     }
 
-    return (transaksi['kode_transaksi'] ?? 'ID$idTransaksi').toString();
+    final cartIds = selectedCarts
+        .map((item) => _readInt(item['id_keranjang']))
+        .where((id) => id > 0)
+        .toList();
+
+    if (cartIds.isEmpty) {
+      throw const UserKeranjangException('Keranjang belum dipilih');
+    }
+
+    final result = await _supabase.rpc(
+      'checkout_sewa',
+      params: {
+        'p_user_id': userIdInt,
+        'p_cart_ids': cartIds,
+        'p_payment_method': paymentMethod,
+        'p_bukti_pembayaran': buktiPembayaran,
+      },
+    );
+
+    final row = _firstRpcRow(result);
+    final idTransaksi = row?['id_transaksi'];
+
+    if (paymentMethod.toLowerCase() == 'qris' && idTransaksi != null) {
+      await _supabase
+          .from('transaksi')
+          .update({'status_pajak': 'sudah_dibayar'})
+          .eq('id_transaksi', idTransaksi);
+    }
+
+    return (row?['kode_transaksi'] ?? _formatTransactionCode(idTransaksi))
+        .toString();
+  }
+
+  Future<String?> pickAndUploadPaymentProof() async {
+    final userId = await currentUserId();
+    if (userId == null) {
+      throw const UserKeranjangException('User belum login');
+    }
+
+    final picked = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+      maxWidth: 1600,
+    );
+
+    if (picked == null) return null;
+
+    final bytes = await picked.readAsBytes();
+    if (bytes.length > 3 * 1024 * 1024) {
+      throw const UserKeranjangException(
+        'Ukuran bukti pembayaran maksimal 3 MB',
+      );
+    }
+
+    final cleanName = picked.name.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
+    final ext = cleanName.split('.').last.toLowerCase();
+    final contentType = ext == 'png' ? 'image/png' : 'image/jpeg';
+    final path =
+        'checkout/$userId/${DateTime.now().millisecondsSinceEpoch}_$cleanName';
+
+    await _supabase.storage
+        .from(_proofBucket)
+        .uploadBinary(
+          path,
+          bytes,
+          fileOptions: FileOptions(contentType: contentType),
+        );
+
+    return _supabase.storage.from(_proofBucket).getPublicUrl(path);
   }
 
   Future<dynamic> currentUserId() async {
+    final appSession = await SessionManager.loadSession();
+    if (appSession?.userId != null) return appSession!.userId;
+
     final authUser =
         _supabase.auth.currentUser ?? _supabase.auth.currentSession?.user;
     if (authUser != null) return authUser.id;
 
-    final appSession = await SessionManager.loadSession();
-    return appSession?.userId;
+    return null;
   }
 
   int _readInt(dynamic value) {
     if (value is num) return value.toInt();
     return int.tryParse((value ?? '0').toString()) ?? 0;
+  }
+
+  Map<String, dynamic>? _firstRpcRow(dynamic result) {
+    if (result is List && result.isNotEmpty) {
+      return Map<String, dynamic>.from(result.first as Map);
+    }
+    if (result is Map) return Map<String, dynamic>.from(result);
+    return null;
+  }
+
+  String _formatTransactionCode(dynamic id) {
+    final number = _readInt(id);
+    if (number <= 0) return 'ID0000000';
+    return 'ID${number.toString().padLeft(7, '0')}';
   }
 }
 

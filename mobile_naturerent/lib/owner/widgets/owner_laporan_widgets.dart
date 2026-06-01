@@ -346,6 +346,8 @@ class _LaporanStatTile extends StatelessWidget {
                 const SizedBox(height: 3),
                 Text(
                   item.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(
                     fontSize: 11,
                     color: const Color(0xFF888888),

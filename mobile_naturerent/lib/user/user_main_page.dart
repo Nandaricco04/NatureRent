@@ -124,6 +124,7 @@ class _UserMainPageState extends State<UserMainPage> {
         openCheckoutOnLoad: _openCartCheckout,
         popCheckoutOnBack: widget.popCartCheckoutOnBack,
         checkoutBackSignal: _cartCheckoutBackSignal,
+        onCheckoutComplete: () => _selectTab(2),
         onCheckoutModeChanged: (value) {
           if (value && _initialCartId != null) {
             _initialCartId = null;
