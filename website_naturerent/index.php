@@ -124,7 +124,7 @@ if ($page === 'users' && $userAction === 'add') {
             } elseif ($page === 'informasi' && $userAction === 'add') {
                 $pageFile = __DIR__ . '/pages/informasi_add.php';
             } elseif ($page === 'informasi' && $userAction === 'edit') {
-                $pageFile = __DIR__ . '/pages/informasi_edit.php';g
+                $pageFile = __DIR__ . '/pages/informasi_edit.php';
             }
             
             if (is_file($pageFile)) {

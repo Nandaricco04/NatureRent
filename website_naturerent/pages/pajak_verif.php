@@ -85,13 +85,20 @@ $statusOptions = [
                     </div>
                 </div>
 
-                <div class="pajak-info-field">
+                <!-- <div class="pajak-info-field">
                     <span>Nama Toko</span>
                     <div class="pajak-info-box">
                         <iconify-icon icon="tabler:store"></iconify-icon>
                         <?= htmlspecialchars(taxStoreName($transaction)) ?>
                     </div>
-                </div>
+                </div> -->
+                <div class="pajak-info-field">
+    <span>Nama Toko</span>
+    <div class="pajak-info-box">
+        <iconify-icon icon="tabler:building-store"></iconify-icon>
+        <?= htmlspecialchars(taxStoreName($transaction)) ?>
+    </div>
+</div>
 
                 <div class="pajak-info-field">
                     <span>Nama Alat</span>
