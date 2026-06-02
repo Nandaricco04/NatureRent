@@ -169,26 +169,16 @@ $statusOptions = [
                 <div class="promosi-info-field">
                     <span>Bukti Pembayaran</span>
                     <a
-                        class="promosi-info-box promosi-proof-link"
+                        class="promosi-doc-link"
                         href="<?= htmlspecialchars($proofUrl ?: '#') ?>"
                         target="_blank"
                         rel="noopener"
                     >
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <rect x="3" y="5" width="18" height="14" rx="2"></rect>
-                            <path d="m8 15 3-3 2 2 3-4 2 5"></path>
-                        </svg>
+                        <iconify-icon icon="tabler:photo" class="promosi-doc-icon"></iconify-icon>
                         <?= htmlspecialchars(promotionProofName($promotion)) ?>
+                        <iconify-icon icon="tabler:external-link" class="promosi-doc-ext"></iconify-icon>
                     </a>
                 </div>
-                <?php if ($proofUrl !== ''): ?>
-                    <div class="promosi-proof-preview">
-                        <span>Preview Bukti Pembayaran</span>
-                        <a href="<?= htmlspecialchars($proofUrl) ?>" target="_blank" rel="noopener">
-                            <img src="<?= htmlspecialchars($proofUrl) ?>" alt="Bukti pembayaran">
-                        </a>
-                    </div>
-                <?php endif; ?>
             </div>
 
             <div class="promosi-status-section">

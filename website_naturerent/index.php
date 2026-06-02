@@ -11,6 +11,7 @@ $allowedPages = [
     'kategori' => 'Kategori Alat',
     'transaksi' => 'Transaksi',
     'komplain' => 'Komplain',
+    'pajak' => 'Pajak',
     'banner' => 'Banner Destinasi',
     'promosi' => 'Promosi Alat',
 ];
@@ -37,6 +38,9 @@ if ($page === 'users' && $userAction === 'add') {
     $pageTitle = 'Verifikasi Owner';
 } elseif ($page === 'promosi' && $userAction === 'verif') {
     $pageTitle = 'Verifikasi Promosi Iklan';
+} elseif ($page === 'pajak' && $userAction === 'verif') {
+    $breadcrumbTitle .= ' / Verifikasi Pajak';
+    $pageTitle = 'Verifikasi Pajak';
 } elseif ($page === 'informasi' && $userAction === 'add') {
     $breadcrumbTitle .= ' / TambahInformasi';
     $pageTitle = 'Tambah Informasi';
@@ -74,6 +78,11 @@ if ($page === 'users' && $userAction === 'add') {
     <?php if ($page === 'informasi'): ?>
     <link rel="stylesheet" href="assets/css/informasi_style.css">
     <?php endif; ?>
+    <?php if ($page === 'pajak'): ?>
+        <link rel="stylesheet" href="assets/css/user_style.css">
+        <link rel="stylesheet" href="assets/css/owners_style.css">
+        <link rel="stylesheet" href="assets/css/pajak_style.css">
+    <?php endif; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
 </head>
@@ -110,10 +119,12 @@ if ($page === 'users' && $userAction === 'add') {
                 $pageFile = __DIR__ . '/pages/owner_verif.php';
             } elseif ($page === 'promosi' && $userAction === 'verif') {
                 $pageFile = __DIR__ . '/pages/promosi_verif.php';
+            } elseif ($page === 'pajak' && $userAction === 'verif') {
+                $pageFile = __DIR__ . '/pages/pajak_verif.php';
             } elseif ($page === 'informasi' && $userAction === 'add') {
                 $pageFile = __DIR__ . '/pages/informasi_add.php';
             } elseif ($page === 'informasi' && $userAction === 'edit') {
-                $pageFile = __DIR__ . '/pages/informasi_edit.php';
+                $pageFile = __DIR__ . '/pages/informasi_edit.php';g
             }
             
             if (is_file($pageFile)) {
@@ -141,6 +152,9 @@ if ($page === 'users' && $userAction === 'add') {
     <?php endif; ?>
     <?php if ($page === 'promosi'): ?>
         <script src="assets/js/promosi_script.js?v=<?= filemtime(__DIR__ . '/assets/js/promosi_script.js') ?>"></script>
+    <?php endif; ?>
+    <?php if ($page === 'pajak'): ?>
+        <script src="assets/js/pajak_script.js?v=<?= filemtime(__DIR__ . '/assets/js/pajak_script.js') ?>"></script>
     <?php endif; ?>
 </body>
 </html>

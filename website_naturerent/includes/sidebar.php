@@ -15,6 +15,7 @@ $menuGroups = [
             ['page' => 'owners', 'title' => 'Owner Management', 'icon' => 'Owner.png'],
             ['page' => 'transaksi', 'title' => 'Transaksi', 'icon' => 'Transaksi.png'],
             ['page' => 'komplain', 'title' => 'Komplain', 'icon' => 'Komplain.png'],
+            ['page' => 'pajak', 'title' => 'Pajak', 'icon' => 'Pajak.png'],
         ],
     ],
     [
