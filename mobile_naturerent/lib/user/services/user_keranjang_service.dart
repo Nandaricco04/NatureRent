@@ -106,6 +106,17 @@ class UserKeranjangService {
     final row = _firstRpcRow(result);
     final idTransaksi = row?['id_transaksi'];
 
+    if (idTransaksi != null) {
+      await _createNotification(
+        userId: userIdInt,
+        transactionId: idTransaksi,
+        type: 'booking_success',
+        title: 'Booking Berhasil',
+        message:
+            'Pesanan ${_formatTransactionCode(idTransaksi)} berhasil dibuat. Cek detail booking di halaman pesanan.',
+      );
+    }
+
     if (paymentMethod.toLowerCase() == 'qris' && idTransaksi != null) {
       await _supabase
           .from('transaksi')
@@ -115,6 +126,25 @@ class UserKeranjangService {
 
     return (row?['kode_transaksi'] ?? _formatTransactionCode(idTransaksi))
         .toString();
+  }
+
+  Future<void> _createNotification({
+    required dynamic userId,
+    required dynamic transactionId,
+    required String type,
+    required String title,
+    required String message,
+  }) async {
+    await _supabase.rpc(
+      'create_notification',
+      params: {
+        'p_user_id': userId,
+        'p_transaksi_id': transactionId,
+        'p_type': type,
+        'p_title': title,
+        'p_message': message,
+      },
+    );
   }
 
   Future<String?> pickAndUploadPaymentProof() async {

@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'services/user_home_service.dart';
+import 'services/user_notification_service.dart';
 import 'widgets/user_home_widgets.dart';
+import 'user_notification_page.dart';
 
 class UserHomePage extends StatefulWidget {
   const UserHomePage({
     super.key,
+    required this.userId,
     this.name,
     required this.initialLocation,
     required this.onLocationChanged,
     required this.onOpenSearch,
   });
 
+  final dynamic userId;
   final String? name;
   final String initialLocation;
   final ValueChanged<String> onLocationChanged;
@@ -24,6 +28,7 @@ class UserHomePage extends StatefulWidget {
 
 class _UserHomePageState extends State<UserHomePage> {
   final _service = UserHomeService();
+  final _notificationService = UserNotificationService();
   final _searchC = TextEditingController();
 
   bool _loading = true;
@@ -34,6 +39,7 @@ class _UserHomePageState extends State<UserHomePage> {
   List<UserHomeCategory> _categories = [];
   List<UserHomeProduct> _products = [];
   List<UserHomeDestination> _destinations = [];
+  bool _hasUnreadNotifications = false;
 
   static const _green = Color(0xFF297B2D);
 
@@ -42,6 +48,7 @@ class _UserHomePageState extends State<UserHomePage> {
     super.initState();
     _selectedLocation = widget.initialLocation;
     _loadHomeData();
+    _loadUnreadNotifications();
   }
 
   @override
@@ -96,6 +103,24 @@ class _UserHomePageState extends State<UserHomePage> {
     }
   }
 
+  Future<void> _loadUnreadNotifications() async {
+    try {
+      final hasUnread = await _notificationService.hasUnread(widget.userId);
+      if (!mounted) return;
+      setState(() => _hasUnreadNotifications = hasUnread);
+    } catch (_) {}
+  }
+
+  Future<void> _openNotifications() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => UserNotificationPage(userId: widget.userId),
+      ),
+    );
+    if (mounted) _loadUnreadNotifications();
+  }
+
   void _changeLocation(String location) {
     setState(() => _selectedLocation = location);
     widget.onLocationChanged(location);
@@ -146,6 +171,8 @@ class _UserHomePageState extends State<UserHomePage> {
               onLocationChanged: _changeLocation,
               onSearchSubmitted: _submitSearch,
               onSearchCleared: () => setState(() {}),
+              hasUnreadNotifications: _hasUnreadNotifications,
+              onOpenNotifications: _openNotifications,
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 26, 16, 28),

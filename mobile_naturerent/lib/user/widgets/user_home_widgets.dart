@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../services/user_home_service.dart';
 import '../user_detail_alat.dart';
+import 'user_notification_widgets.dart';
 
 class UserHomeHeader extends StatelessWidget {
   const UserHomeHeader({
@@ -16,6 +17,8 @@ class UserHomeHeader extends StatelessWidget {
     required this.onLocationChanged,
     required this.onSearchSubmitted,
     required this.onSearchCleared,
+    required this.hasUnreadNotifications,
+    required this.onOpenNotifications,
   });
 
   final String name;
@@ -25,6 +28,8 @@ class UserHomeHeader extends StatelessWidget {
   final ValueChanged<String> onLocationChanged;
   final ValueChanged<String> onSearchSubmitted;
   final VoidCallback onSearchCleared;
+  final bool hasUnreadNotifications;
+  final VoidCallback onOpenNotifications;
 
   static const _green = Color(0xFF297B2D);
 
@@ -74,17 +79,11 @@ class UserHomeHeader extends StatelessWidget {
                 onChanged: onLocationChanged,
               ),
               const SizedBox(width: 10),
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.18),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.notifications_none_rounded,
-                  color: Colors.white,
-                ),
+              UserNotificationBellButton(
+                hasUnread: hasUnreadNotifications,
+                onTap: onOpenNotifications,
+                backgroundColor: Colors.white.withValues(alpha: 0.18),
+                iconColor: Colors.white,
               ),
             ],
           ),
@@ -741,10 +740,10 @@ class UserHomeProductCard extends StatelessWidget {
                       color: const Color(0xFFEAF6EC),
                       child: product.imageUrl.isEmpty
                           ? const Icon(
-                            Icons.terrain,
-                            color: Color(0xFF297B2D),
-                            size: 44,
-                          )
+                              Icons.terrain,
+                              color: Color(0xFF297B2D),
+                              size: 44,
+                            )
                           : Image.network(
                               product.imageUrl,
                               fit: BoxFit.cover,
@@ -772,7 +771,7 @@ class UserHomeProductCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(5),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.12),
+                              color: Colors.black.withValues(alpha: 0.12),
                               blurRadius: 4,
                               offset: const Offset(0, 2),
                             ),

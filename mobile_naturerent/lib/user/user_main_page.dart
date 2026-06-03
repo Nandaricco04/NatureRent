@@ -107,6 +107,7 @@ class _UserMainPageState extends State<UserMainPage> {
     final pages = [
       if (_searchQuery == null)
         UserHomePage(
+          userId: widget.userId,
           name: widget.name,
           initialLocation: _homeLocation,
           onLocationChanged: (location) => _homeLocation = location,
