@@ -92,10 +92,16 @@ class UserPesananStatusMenu extends StatelessWidget {
 }
 
 class UserPesananOrderCard extends StatelessWidget {
-  const UserPesananOrderCard({super.key, required this.order, this.onCancel});
+  const UserPesananOrderCard({
+    super.key,
+    required this.order,
+    this.onCancel,
+    this.onReview,
+  });
 
   final Map<String, dynamic> order;
   final VoidCallback? onCancel;
+  final VoidCallback? onReview;
 
   @override
   Widget build(BuildContext context) {
@@ -104,6 +110,7 @@ class UserPesananOrderCard extends StatelessWidget {
     final firstItem = items.isNotEmpty ? items[0] : null;
     final tanggalMulai = _parseDate(firstItem?['tanggal_mulai']);
     final tanggalSelesai = _parseDate(firstItem?['tanggal_kembali']);
+    final canReview = items.any((item) => item is Map && !hasReview(item));
 
     return Container(
       margin: const EdgeInsets.only(bottom: 18),
@@ -184,12 +191,10 @@ class UserPesananOrderCard extends StatelessWidget {
           const Spacer(),
           Align(
             alignment: Alignment.centerRight,
-            child: SizedBox(
-              width: canCancelStatus(status) ? 196 : 120,
-              child: UserPesananStatusActions(
-                status: status,
-                onCancel: onCancel,
-              ),
+            child: UserPesananStatusActions(
+              status: status,
+              onCancel: onCancel,
+              onReview: canReview ? onReview : null,
             ),
           ),
         ],
@@ -203,10 +208,12 @@ class UserPesananStatusActions extends StatelessWidget {
     super.key,
     required this.status,
     this.onCancel,
+    this.onReview,
   });
 
   final String status;
   final VoidCallback? onCancel;
+  final VoidCallback? onReview;
 
   @override
   Widget build(BuildContext context) {
@@ -214,33 +221,134 @@ class UserPesananStatusActions extends StatelessWidget {
     final canCancel = canCancelStatus(status);
 
     if (canCancel) {
-      return Row(
-        children: [
-          Expanded(
-            child: UserPesananActionChip(
-              label: 'Batalkan',
-              color: Colors.white,
-              textColor: Color(0xFFD32F2F),
-              borderColor: Color(0xFFD32F2F),
-              onTap: onCancel,
+      return SizedBox(
+        width: 196,
+        child: Row(
+          children: [
+            Expanded(
+              child: UserPesananActionChip(
+                label: 'Batalkan',
+                color: Colors.white,
+                textColor: Color(0xFFD32F2F),
+                borderColor: Color(0xFFD32F2F),
+                onTap: onCancel,
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: UserPesananActionChip(
-              label: label,
-              color: statusColor(status),
-              textColor: Colors.white,
+            const SizedBox(width: 8),
+            Expanded(
+              child: UserPesananActionChip(
+                label: label,
+                color: statusColor(status),
+                textColor: Colors.white,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 
-    return UserPesananActionChip(
-      label: label,
-      color: statusColor(status),
-      textColor: Colors.white,
+    if (isFinishedStatus(status) && onReview != null) {
+      return SizedBox(
+        width: 196,
+        child: Row(
+          children: [
+            Expanded(
+              child: UserPesananActionChip(
+                label: 'Review',
+                color: Colors.white,
+                textColor: userPesananGreen,
+                borderColor: userPesananGreen,
+                onTap: onReview,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: UserPesananActionChip(
+                label: label,
+                color: statusColor(status),
+                textColor: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return SizedBox(
+      width: 120,
+      child: UserPesananActionChip(
+        label: label,
+        color: statusColor(status),
+        textColor: Colors.white,
+      ),
+    );
+  }
+}
+
+class UserPesananReviewItemTile extends StatelessWidget {
+  const UserPesananReviewItemTile({
+    super.key,
+    required this.item,
+    required this.onTap,
+  });
+
+  final Map<String, dynamic> item;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final product = item['products'] is Map ? item['products'] as Map : null;
+    final imageUrl = (product?['image_url'] ?? '').toString();
+    final productName =
+        (item['nama_produk'] ?? product?['name'] ?? 'Alat outdoor').toString();
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x12000000),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(7),
+          child: Container(
+            width: 52,
+            height: 52,
+            color: const Color(0xFFEAF6EC),
+            child: imageUrl.isEmpty
+                ? const Icon(Icons.terrain, color: userPesananGreen)
+                : Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.terrain, color: userPesananGreen),
+                  ),
+          ),
+        ),
+        title: Text(
+          productName,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
+        ),
+        subtitle: Text(
+          formatRp(item['harga_per_hari']),
+          style: const TextStyle(
+            color: userPesananGreen,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        trailing: const Icon(Icons.chevron_right, color: userPesananGreen),
+        onTap: onTap,
+      ),
     );
   }
 }
@@ -301,6 +409,18 @@ bool canCancelStatus(String status) {
   return value == 'menunggu_konfirmasi' ||
       value == 'menunggu' ||
       value == 'dipesan';
+}
+
+bool isFinishedStatus(String status) {
+  final value = status.trim().toLowerCase().replaceAll(RegExp(r'[\s-]+'), '_');
+  return value == 'selesai';
+}
+
+bool hasReview(Map<dynamic, dynamic> item) {
+  final reviews = item['reviews'];
+  if (reviews is List) return reviews.isNotEmpty;
+  if (reviews is Map) return reviews.isNotEmpty;
+  return false;
 }
 
 Color statusColor(String status) {

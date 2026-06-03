@@ -42,12 +42,34 @@ class _UserDetailAlatState extends State<UserDetailAlat> {
 
   Future<void> _getProduct() async {
     final data = await _service.fetchProduct(widget.productId);
-    if (data != null) setState(() => product = data);
+    if (data != null) {
+      setState(() {
+        product = data;
+        _applyAverageRating();
+      });
+    }
   }
 
   Future<void> _getReviews() async {
     final data = await _service.fetchReviews(widget.productId);
-    setState(() => reviews = data);
+    setState(() {
+      reviews = data;
+      _applyAverageRating();
+    });
+  }
+
+  void _applyAverageRating() {
+    if (product == null || reviews.isEmpty) return;
+
+    final total = reviews.fold<double>(0, (sum, review) {
+      final rating = review['rating'];
+      if (rating is num) return sum + rating.toDouble();
+      return sum + (double.tryParse((rating ?? '0').toString()) ?? 0);
+    });
+
+    product!['rating'] = double.parse(
+      (total / reviews.length).toStringAsFixed(1),
+    );
   }
 
   int get totalDays {
@@ -309,7 +331,7 @@ class _UserDetailAlatState extends State<UserDetailAlat> {
         border: Border.all(color: Colors.green.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -404,8 +426,8 @@ class _UserDetailAlatState extends State<UserDetailAlat> {
                               MaterialPageRoute(
                                 builder: (_) => UserProfilTokoPage(
                                   ownerId: product!['owner_id'],
-                                )
-                              )
+                                ),
+                              ),
                             );
                           },
                           icon: const Icon(
@@ -775,8 +797,9 @@ class _UserDetailAlatState extends State<UserDetailAlat> {
   String _timeAgo(String? date) {
     if (date == null) return '';
 
-    final createdAt = DateTime.parse(date);
-    final difference = DateTime.now().difference(createdAt);
+    final createdAt = _parseReviewDate(date);
+    var difference = DateTime.now().difference(createdAt);
+    if (difference.isNegative) difference = Duration.zero;
     // final TextEditingController qtyController = TextEditingController();
 
     if (difference.inDays > 7) {
@@ -790,6 +813,12 @@ class _UserDetailAlatState extends State<UserDetailAlat> {
     } else {
       return 'Baru saja';
     }
+  }
+
+  DateTime _parseReviewDate(String date) {
+    final hasTimezone = RegExp(r'(Z|[+-]\d{2}:?\d{2})$').hasMatch(date);
+    final normalized = hasTimezone ? date : '${date}Z';
+    return DateTime.parse(normalized).toLocal();
   }
 
   Widget _buildSewaButton() {

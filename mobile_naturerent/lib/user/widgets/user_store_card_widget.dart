@@ -42,11 +42,15 @@ class UserStoreCardWidget extends StatelessWidget {
               height: 80,
               color: const Color(0xFFE9F3EA),
               child: fotoUrl.isEmpty
-                  ? const Icon(Icons.storefront, size: 40, color: Color(0xFF297B2D))
+                  ? const Icon(
+                      Icons.storefront,
+                      size: 40,
+                      color: Color(0xFF297B2D),
+                    )
                   : Image.network(
                       fotoUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(
+                      errorBuilder: (context, error, stackTrace) => const Icon(
                         Icons.storefront,
                         size: 40,
                         color: Color(0xFF297B2D),
@@ -70,23 +74,24 @@ class UserStoreCardWidget extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    ...List.generate(5, (i) {
-                      return Icon(
-                        i < ratingRataRata.round() ? Icons.star : Icons.star_border,
-                        color: Colors.orange,
-                        size: 16,
-                      );
-                    }),
+                    const Icon(Icons.star, color: Color(0xFFE8752A), size: 16),
                     const SizedBox(width: 4),
                     Text(
-                      ratingRataRata.toStringAsFixed(1),
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                      ratingRataRata <= 0
+                          ? '-'
+                          : ratingRataRata.toStringAsFixed(1),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 4),
-                if (namaKota.isNotEmpty) _infoRow(Icons.location_on_rounded, namaKota),
-                if (jamOps.isNotEmpty) _infoRow(Icons.access_time_rounded, 'Buka: $jamOps'),
+                if (namaKota.isNotEmpty)
+                  _infoRow(Icons.location_on_rounded, namaKota),
+                if (jamOps.isNotEmpty)
+                  _infoRow(Icons.access_time_rounded, 'Buka: $jamOps'),
                 if (telepon.isNotEmpty)
                   GestureDetector(
                     onTap: () {
@@ -97,7 +102,8 @@ class UserStoreCardWidget extends StatelessWidget {
                     },
                     child: _infoRow(Icons.phone_rounded, telepon),
                   ),
-                if (alamat.isNotEmpty) _infoRow(Icons.map_outlined, alamat, maxLines: 2),
+                if (alamat.isNotEmpty)
+                  _infoRow(Icons.map_outlined, alamat, maxLines: 2),
               ],
             ),
           ),

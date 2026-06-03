@@ -131,6 +131,7 @@ class UserHomeService {
       _fetchRentCounts(),
       _fetchDestinations(),
       _fetchActiveAdvertisedProductIds(),
+      _fetchReviewRatings(),
     ]);
 
     final locations = results[0] as List<UserHomeLocation>;
@@ -140,6 +141,7 @@ class UserHomeService {
     final rentCounts = results[4] as Map<String, int>;
     final destinations = results[5] as List<Map<String, dynamic>>;
     final activeAdvertisedIds = results[6] as Set<String>;
+    final reviewRatings = results[7] as Map<String, double>;
 
     final ownerById = {
       for (final owner in owners) owner['id_owner']?.toString(): owner,
@@ -171,7 +173,9 @@ class UserHomeService {
             pricePerDay: _readDouble(product['price_per_day']),
             stock: _readInt(product['stock']),
             imageUrl: (product['image_url'] ?? '').toString(),
-            rating: _readDouble(product['rating']),
+            rating:
+                reviewRatings[product['id_product']?.toString()] ??
+                _readDouble(product['rating']),
             rentCount: rentCounts[product['id_product']?.toString()] ?? 0,
             advertised:
                 _readBool(product['iklan']) ||
@@ -337,6 +341,32 @@ class UserHomeService {
       }
 
       return counts;
+    } catch (_) {
+      return {};
+    }
+  }
+
+  Future<Map<String, double>> _fetchReviewRatings() async {
+    try {
+      final data = await _supabase.from('reviews').select('product_id, rating');
+      final totals = <String, double>{};
+      final counts = <String, int>{};
+
+      for (final row in List<Map<String, dynamic>>.from(data)) {
+        final productId = row['product_id']?.toString();
+        if (productId == null || productId.isEmpty) continue;
+
+        totals[productId] =
+            (totals[productId] ?? 0) + _readDouble(row['rating']);
+        counts[productId] = (counts[productId] ?? 0) + 1;
+      }
+
+      return {
+        for (final entry in totals.entries)
+          entry.key: double.parse(
+            (entry.value / (counts[entry.key] ?? 1)).toStringAsFixed(1),
+          ),
+      };
     } catch (_) {
       return {};
     }

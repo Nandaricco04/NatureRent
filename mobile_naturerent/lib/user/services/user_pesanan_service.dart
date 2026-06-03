@@ -9,7 +9,9 @@ class UserPesananService {
   Future<List<Map<String, dynamic>>> fetchPesanan() async {
     final data = await _supabase
         .from('transaksi')
-        .select('*, transaksi_item(*)')
+        .select(
+          '*, transaksi_item(*, products(name, image_url, price_per_day, owner(nama_toko)), reviews(id_review))',
+        )
         .order('created_at', ascending: false);
 
     return List<Map<String, dynamic>>.from(data);

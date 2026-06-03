@@ -45,9 +45,9 @@ class _UserProfilTokoPageState extends State<UserProfilTokoPage> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal memuat profil toko: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Gagal memuat profil toko: $e')));
     }
   }
 
@@ -65,7 +65,9 @@ class _UserProfilTokoPageState extends State<UserProfilTokoPage> {
           statusBarBrightness: Brightness.dark,
         ),
         child: _loading
-            ? const Center(child: CircularProgressIndicator(color: primaryGreen))
+            ? const Center(
+                child: CircularProgressIndicator(color: primaryGreen),
+              )
             : CustomScrollView(
                 slivers: [
                   SliverToBoxAdapter(
@@ -94,7 +96,9 @@ class _UserProfilTokoPageState extends State<UserProfilTokoPage> {
                                     width: 36,
                                     height: 36,
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.2),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.2,
+                                      ),
                                       borderRadius: BorderRadius.circular(50),
                                     ),
                                     child: const Icon(
@@ -162,21 +166,23 @@ class _UserProfilTokoPageState extends State<UserProfilTokoPage> {
                       : SliverPadding(
                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                           sliver: SliverGrid(
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) {
-                                return UserProductCardWidget(
-                                  product: _products[index],
-                                  namaToko: (_owner!['nama_toko'] ?? '').toString(),
-                                );
-                              },
-                              childCount: _products.length,
-                            ),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 16,
-                              childAspectRatio: 0.72,
-                            ),
+                            delegate: SliverChildBuilderDelegate((
+                              context,
+                              index,
+                            ) {
+                              return UserProductCardWidget(
+                                product: _products[index],
+                                namaToko: (_owner!['nama_toko'] ?? '')
+                                    .toString(),
+                              );
+                            }, childCount: _products.length),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing: 16,
+                                  mainAxisSpacing: 16,
+                                  childAspectRatio: 0.72,
+                                ),
                           ),
                         ),
                 ],
