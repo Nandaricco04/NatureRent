@@ -157,12 +157,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
               _MenuGroup(
                 children: [
                   _ProfileMenuItem(
-                    icon: Icons.calendar_month_outlined,
-                    title: 'Riwayat Transaksi',
-                    subtitle: 'Lihat semua riwayat sewa',
-                    onTap: () {},
-                  ),
-                  _ProfileMenuItem(
                     icon: Icons.notifications_none,
                     title: 'Notifikasi',
                     subtitle: 'Pesanan, pembayaran, & pengembalian',
