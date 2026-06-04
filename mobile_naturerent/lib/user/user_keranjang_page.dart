@@ -129,12 +129,9 @@ class _UserKeranjangPageState extends State<UserKeranjangPage> {
     setState(() => isCheckingOut = true);
 
     try {
-      final kode = await _service.checkout(
+      final transactionCodes = await _service.checkout(
         selectedCarts: selectedCarts,
         paymentMethod: paymentMethod,
-        subtotalSewa: subtotalSewa,
-        pajak: pajak,
-        totalHarga: totalHarga,
         buktiPembayaran: paymentMethod == 'qris' ? buktiPembayaranUrl : null,
       );
 
@@ -148,7 +145,7 @@ class _UserKeranjangPageState extends State<UserKeranjangPage> {
       });
       await _getKeranjang();
 
-      _showMessage('Checkout berhasil: $kode');
+      _showMessage('Checkout berhasil: ${transactionCodes.join(', ')}');
       widget.onCheckoutComplete?.call();
     } on UserKeranjangException catch (e) {
       if (!mounted) return;

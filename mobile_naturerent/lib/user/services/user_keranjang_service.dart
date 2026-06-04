@@ -66,12 +66,9 @@ class UserKeranjangService {
         .eq('id_keranjang', idKeranjang);
   }
 
-  Future<String> checkout({
+  Future<List<String>> checkout({
     required List<Map<String, dynamic>> selectedCarts,
     required String paymentMethod,
-    required int subtotalSewa,
-    required int pajak,
-    required int totalHarga,
     String? buktiPembayaran,
   }) async {
     final userId = await currentUserId();
@@ -84,48 +81,64 @@ class UserKeranjangService {
       throw const UserKeranjangException('Session user tidak valid');
     }
 
-    final cartIds = selectedCarts
-        .map((item) => _readInt(item['id_keranjang']))
-        .where((id) => id > 0)
-        .toList();
+    final cartsByOwner = <String, List<int>>{};
+    for (final cart in selectedCarts) {
+      final cartId = _readInt(cart['id_keranjang']);
+      final ownerId = _ownerId(cart);
+      if (cartId <= 0 || ownerId == null) {
+        throw const UserKeranjangException(
+          'Data toko pada keranjang tidak valid',
+        );
+      }
+      cartsByOwner.putIfAbsent(ownerId, () => []).add(cartId);
+    }
 
-    if (cartIds.isEmpty) {
+    if (cartsByOwner.isEmpty) {
       throw const UserKeranjangException('Keranjang belum dipilih');
     }
 
-    final result = await _supabase.rpc(
-      'checkout_sewa',
-      params: {
-        'p_user_id': userIdInt,
-        'p_cart_ids': cartIds,
-        'p_payment_method': paymentMethod,
-        'p_bukti_pembayaran': buktiPembayaran,
-      },
-    );
+    final transactionCodes = <String>[];
 
-    final row = _firstRpcRow(result);
-    final idTransaksi = row?['id_transaksi'];
+    for (final cartIds in cartsByOwner.values) {
+      final result = await _supabase.rpc(
+        'checkout_sewa',
+        params: {
+          'p_user_id': userIdInt,
+          'p_cart_ids': cartIds,
+          'p_payment_method': paymentMethod,
+          'p_bukti_pembayaran': buktiPembayaran,
+        },
+      );
 
-    if (idTransaksi != null) {
+      final row = _firstRpcRow(result);
+      final idTransaksi = row?['id_transaksi'];
+      if (idTransaksi == null) {
+        throw const UserKeranjangException('ID transaksi gagal dibuat');
+      }
+
+      final transactionCode =
+          (row?['kode_transaksi'] ?? _formatTransactionCode(idTransaksi))
+              .toString();
+      transactionCodes.add(transactionCode);
+
       await _createNotification(
         userId: userIdInt,
         transactionId: idTransaksi,
         type: 'booking_success',
         title: 'Booking Berhasil',
         message:
-            'Pesanan ${_formatTransactionCode(idTransaksi)} berhasil dibuat. Cek detail booking di halaman pesanan.',
+            'Pesanan $transactionCode berhasil dibuat. Cek detail booking di halaman pesanan.',
       );
+
+      if (paymentMethod.toLowerCase() == 'qris') {
+        await _supabase
+            .from('transaksi')
+            .update({'status_pajak': 'sudah_dibayar'})
+            .eq('id_transaksi', idTransaksi);
+      }
     }
 
-    if (paymentMethod.toLowerCase() == 'qris' && idTransaksi != null) {
-      await _supabase
-          .from('transaksi')
-          .update({'status_pajak': 'sudah_dibayar'})
-          .eq('id_transaksi', idTransaksi);
-    }
-
-    return (row?['kode_transaksi'] ?? _formatTransactionCode(idTransaksi))
-        .toString();
+    return transactionCodes;
   }
 
   Future<void> _createNotification({
@@ -199,6 +212,15 @@ class UserKeranjangService {
   int _readInt(dynamic value) {
     if (value is num) return value.toInt();
     return int.tryParse((value ?? '0').toString()) ?? 0;
+  }
+
+  String? _ownerId(Map<String, dynamic> cart) {
+    final product = cart['products'];
+    if (product is! Map) return null;
+
+    final ownerId = product['owner_id'];
+    if (ownerId == null || ownerId.toString().trim().isEmpty) return null;
+    return ownerId.toString();
   }
 
   Map<String, dynamic>? _firstRpcRow(dynamic result) {
