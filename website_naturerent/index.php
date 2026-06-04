@@ -36,6 +36,9 @@ if ($page === 'users' && $userAction === 'add') {
 } elseif ($page === 'owners' && $userAction === 'detail') {
     $breadcrumbTitle .= ' / Verifikasi Owner';
     $pageTitle = 'Verifikasi Owner';
+} elseif ($page === 'komplain' && $userAction === 'detail') {
+    $breadcrumbTitle .= ' / Detail Komplain';
+    $pageTitle = 'Detail Komplain';
 } elseif ($page === 'promosi' && $userAction === 'verif') {
     $pageTitle = 'Verifikasi Promosi Iklan';
 } elseif ($page === 'pajak' && $userAction === 'verif') {
@@ -65,6 +68,9 @@ if ($page === 'users' && $userAction === 'add') {
     <?php endif; ?>
     <?php if ($page === 'owners' && $userAction === 'detail'): ?>
         <link rel="stylesheet" href="assets/css/owner_verif_style.css">
+    <?php endif; ?>
+    <?php if ($page === 'komplain'): ?>
+        <link rel="stylesheet" href="assets/css/komplain_style.css">
     <?php endif; ?>
     <?php if ($page === 'banner'): ?>
         <link rel="stylesheet" href="assets/css/banner_style.css">
@@ -117,6 +123,8 @@ if ($page === 'users' && $userAction === 'add') {
                 $pageFile = __DIR__ . '/pages/user_edit.php';
             } elseif ($page === 'owners' && $userAction === 'detail') {
                 $pageFile = __DIR__ . '/pages/owner_verif.php';
+            } elseif ($page === 'komplain' && $userAction === 'detail') {
+                $pageFile = __DIR__ . '/pages/komplain_detail.php';
             } elseif ($page === 'promosi' && $userAction === 'verif') {
                 $pageFile = __DIR__ . '/pages/promosi_verif.php';
             } elseif ($page === 'pajak' && $userAction === 'verif') {
@@ -146,6 +154,9 @@ if ($page === 'users' && $userAction === 'add') {
     <?php endif; ?>
     <?php if ($page === 'owners' && $userAction === 'detail'): ?>
         <script src="assets/js/owner_verif_script.js"></script>
+    <?php endif; ?>
+    <?php if ($page === 'komplain'): ?>
+        <script src="assets/js/komplain_script.js"></script>
     <?php endif; ?>
     <?php if ($page === 'banner'): ?>
         <script src="assets/js/banner_script.js?v=<?= filemtime(__DIR__ . '/assets/js/banner_script.js') ?>"></script>
