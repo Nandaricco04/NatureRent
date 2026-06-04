@@ -83,6 +83,9 @@ if ($page === 'users' && $userAction === 'add') {
         <link rel="stylesheet" href="assets/css/owners_style.css">
         <link rel="stylesheet" href="assets/css/pajak_style.css">
     <?php endif; ?>
+    <?php if ($page === 'transaksi'): ?>
+        <link rel="stylesheet" href="assets/css/transaksi_style.css">
+    <?php endif; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
 </head>
@@ -155,6 +158,9 @@ if ($page === 'users' && $userAction === 'add') {
     <?php endif; ?>
     <?php if ($page === 'pajak'): ?>
         <script src="assets/js/pajak_script.js?v=<?= filemtime(__DIR__ . '/assets/js/pajak_script.js') ?>"></script>
+    <?php endif; ?>
+    <?php if ($page === 'transaksi'): ?>
+        <script src="assets/js/transaksi_script.js?v=<?= filemtime(__DIR__ . '/assets/js/transaksi_script.js') ?>"></script>
     <?php endif; ?>
 </body>
 </html>
