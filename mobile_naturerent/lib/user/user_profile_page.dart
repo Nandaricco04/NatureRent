@@ -7,6 +7,9 @@ import 'user_edit_profile_page.dart';
 import 'user_syarat_kebijakan_page.dart';
 import 'user_bantuan_dukungan_page.dart';
 import 'user_keamanan_akun_page.dart';
+import 'user_notification_page.dart';
+import 'services/user_notification_service.dart';
+import 'widgets/user_notification_widgets.dart';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({
@@ -28,9 +31,11 @@ class UserProfilePage extends StatefulWidget {
 
 class _UserProfilePageState extends State<UserProfilePage> {
   final supabase = Supabase.instance.client;
+  final _notificationService = UserNotificationService();
   String? _profileName;
   String? _profileEmail;
   String? _profilePhotoUrl;
+  bool _hasUnreadNotifications = false;
 
   static const _green = Color(0xFF297B2D);
 
@@ -38,6 +43,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
   void initState() {
     super.initState();
     _loadProfileData();
+    _loadUnreadNotifications();
   }
 
   Future<void> _loadProfileData() async {
@@ -69,6 +75,24 @@ class _UserProfilePageState extends State<UserProfilePage> {
         }
       });
     } catch (_) {}
+  }
+
+  Future<void> _loadUnreadNotifications() async {
+    try {
+      final hasUnread = await _notificationService.hasUnread(widget.userId);
+      if (!mounted) return;
+      setState(() => _hasUnreadNotifications = hasUnread);
+    } catch (_) {}
+  }
+
+  Future<void> _openNotifications() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => UserNotificationPage(userId: widget.userId),
+      ),
+    );
+    if (mounted) _loadUnreadNotifications();
   }
 
   @override
@@ -133,16 +157,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
               _MenuGroup(
                 children: [
                   _ProfileMenuItem(
-                    icon: Icons.calendar_month_outlined,
-                    title: 'Riwayat Transaksi',
-                    subtitle: 'Lihat semua riwayat sewa',
-                    onTap: () {},
-                  ),
-                  _ProfileMenuItem(
                     icon: Icons.notifications_none,
                     title: 'Notifikasi',
                     subtitle: 'Pesanan, pembayaran, & pengembalian',
-                    onTap: () {},
+                    hasBadge: _hasUnreadNotifications,
+                    onTap: _openNotifications,
                   ),
                 ],
               ),
@@ -363,12 +382,14 @@ class _ProfileMenuItem extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.hasBadge = false,
   });
 
   final IconData icon;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
+  final bool hasBadge;
 
   @override
   Widget build(BuildContext context) {
@@ -378,14 +399,32 @@ class _ProfileMenuItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
         child: Row(
           children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: const BoxDecoration(
-                color: Color(0xFFF4F0EC),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, size: 24, color: const Color(0xFF212121)),
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF4F0EC),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 24, color: const Color(0xFF212121)),
+                ),
+                if (hasBadge)
+                  Positioned(
+                    top: 1,
+                    right: 1,
+                    child: Container(
+                      width: 9,
+                      height: 9,
+                      decoration: const BoxDecoration(
+                        color: userNotificationOrange,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(width: 14),
             Expanded(
