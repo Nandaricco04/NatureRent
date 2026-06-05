@@ -1,8 +1,7 @@
-// Auto submit search saat ketik
 let _kmSearchTimer;
-const kmSearch = document.getElementById('komplainKeyword');
-if (kmSearch) {
-    kmSearch.addEventListener('input', function () {
+const kmSearchEl = document.getElementById('komplainKeyword');
+if (kmSearchEl) {
+    kmSearchEl.addEventListener('input', function () {
         clearTimeout(_kmSearchTimer);
         _kmSearchTimer = setTimeout(function () {
             document.getElementById('komplainFilterForm').submit();
@@ -10,7 +9,6 @@ if (kmSearch) {
     });
 }
 
-// Submit filter saat dropdown berubah
 const kmFilter = document.getElementById('komplainStatusFilter');
 if (kmFilter) {
     kmFilter.addEventListener('change', function () {
@@ -19,7 +17,6 @@ if (kmFilter) {
     });
 }
 
-// Modal hapus
 function komplainOpenHapus(id) {
     document.getElementById('km-hapus-id').value = id;
     document.getElementById('komplainModalHapus').classList.add('open');

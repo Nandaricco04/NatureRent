@@ -7,18 +7,9 @@ class KomplainRepository
     {
         $query = 'support?order=created_at.desc&select=*';
 
-        if ($status !== 'Semua') {
+        if ($status !== 'Semua' && $status !== '') {
             $query .= '&status=eq.' . urlencode($status);
         }
-
-        if ($keyword !== '') {
-            $like   = '%' . $keyword . '%';
-            $query .= '&or=(nama_pengguna.ilike.' . urlencode($like) . ',id_pesanan.ilike.' . urlencode($like) . ')';
-        }
-
-        error_log('Query: ' . $query); // ← tambahkan ini
-        $result = supabaseRequest($query);
-        error_log('Result: ' . json_encode($result)); // ← dan ini
 
         $result = supabaseRequest($query);
 
@@ -26,7 +17,18 @@ class KomplainRepository
             return [];
         }
 
-        return $result['data'];
+        $data = $result['data'];
+
+        if ($keyword !== '') {
+            $keyword = strtolower($keyword);
+            $data = array_values(array_filter($data, function ($row) use ($keyword) {
+                $nama = strtolower($row['nama_pengguna'] ?? '');
+                $id   = strtolower($row['id_pesanan']    ?? '');
+                return str_contains($nama, $keyword) || str_contains($id, $keyword);
+            }));
+        }
+
+        return $data;
     }
 
     public static function getById(int $id): ?array
@@ -81,7 +83,6 @@ class KomplainRepository
     }
 }
 
-// ── Hitung jumlah komplain per status ──────────────────────────────────────
 function countKomplainByStatus(): array
 {
     $result = supabaseRequest('support?select=status');
@@ -108,7 +109,6 @@ function countKomplainByStatus(): array
     return $counts;
 }
 
-// ── Ambil detail komplain by id ────────────────────────────────────────────
 function findKomplainById(int $id): ?array
 {
     $query = http_build_query([
@@ -126,7 +126,6 @@ function findKomplainById(int $id): ?array
     return $result['data'][0];
 }
 
-// ── Update status komplain ─────────────────────────────────────────────────
 function updateKomplainStatus(int $id, string $status): array
 {
     return supabaseRequest('support?id_support=eq.' . $id, 'PATCH', [
@@ -134,7 +133,6 @@ function updateKomplainStatus(int $id, string $status): array
     ]);
 }
 
-// ── Hapus komplain ─────────────────────────────────────────────────────────
 function deleteKomplain(int $id): array
 {
     return supabaseRequest('support?id_support=eq.' . $id, 'DELETE');

@@ -1,9 +1,7 @@
 <?php
-// pages/komplain.php
 
 require_once __DIR__ . '/../repositories/komplain_repository.php';
 
-// ── Handle aksi POST ───────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $aksi = $_POST['aksi'] ?? '';
 
@@ -30,13 +28,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// ── Parameter filter & paginasi ────────────────────────────────
 $filterStatus  = $_GET['status']  ?? 'Semua';
 $filterKeyword = $_GET['keyword'] ?? '';
 $currentPage   = max(1, (int)($_GET['p'] ?? 1));
 $perPage       = 5;
 
-// ── Ambil data ─────────────────────────────────────────────────
 $allData     = KomplainRepository::getAll($filterStatus, $filterKeyword);
 $summary     = KomplainRepository::getSummary();
 $total       = count($allData);
@@ -45,7 +41,6 @@ $currentPage = min($currentPage, $lastPage);
 $offset      = ($currentPage - 1) * $perPage;
 $pageData    = array_slice($allData, $offset, $perPage);
 
-// ── Helpers ────────────────────────────────────────────────────
 function komplainStatusBadge(string $s): string
 {
     $map = [
@@ -67,12 +62,10 @@ function komplainTruncate(string $str, int $max = 35): string
 
 function komplainPageUrl(int $p, string $status, string $keyword): string
 {
-    return 'index.php?' . http_build_query(array_filter([
-        'page'    => 'komplain',
-        'status'  => $status !== 'Semua' ? $status : '',
-        'keyword' => $keyword,
-        'p'       => $p,
-    ]));
+    $params = ['page' => 'komplain', 'p' => $p];
+    if ($status !== 'Semua') $params['status'] = $status;
+    if ($keyword !== '') $params['keyword'] = $keyword;
+    return 'index.php?' . http_build_query($params);
 }
 
 function komplainFormatTanggal(string $ts): string
@@ -84,7 +77,6 @@ function komplainFormatTanggal(string $ts): string
 
 <div class="komplain-wrap">
 
-    <!-- ══ STAT CARDS ══════════════════════════════════════ -->
     <div class="komplain-stat-grid">
 
         <div class="komplain-stat-card">
@@ -135,29 +127,27 @@ function komplainFormatTanggal(string $ts): string
             <p class="komplain-stat-sub">Komplain terselesaikan</p>
         </div>
 
-    </div><!-- /.komplain-stat-grid -->
+    </div>
 
-
-    <!-- ══ TABLE CARD ══════════════════════════════════════ -->
     <div class="komplain-table-card">
 
         <!-- Toolbar -->
         <div class="komplain-table-header">
             <h2 class="komplain-table-title">Daftar Komplain</h2>
             <div class="komplain-toolbar">
-                <form method="GET" action="index.php?page=komplain" id="komplainFilterForm">
-                    <input type="hidden" name="page"   value="komplain">
-                    <input type="hidden" name="status" id="hiddenStatus"
-                           value="<?= htmlspecialchars($filterStatus !== 'Semua' ? $filterStatus : '') ?>">
+                <form method="GET" action="index.php" id="komplainFilterForm">
+                    <input type="hidden" name="page" value="komplain">
+                    <input type="hidden" name="status" id="hiddenStatus" 
+                        value="<?= htmlspecialchars($filterStatus === 'Semua' ? '' : $filterStatus) ?>">
                     <div class="komplain-search-box">
-                        <iconify-icon icon="tabler:search" style="color:#9e9e9e;font-size:16px;flex-shrink:0;"></iconify-icon>
+                        <iconify-icon icon="tabler:search"></iconify-icon>
                         <input
                             type="text"
-                            name="keyword"
+                            name="keyword"    
                             id="komplainKeyword"
                             placeholder="Cari nama atau ID pesanan"
                             value="<?= htmlspecialchars($filterKeyword) ?>"
-                        />
+                        >
                     </div>
                 </form>
                 <div class="komplain-filter-wrap">
@@ -172,7 +162,6 @@ function komplainFormatTanggal(string $ts): string
             </div>
         </div>
 
-        <!-- Table -->
         <div class="komplain-table-wrap">
             <table class="komplain-table">
                 <thead>
@@ -237,7 +226,6 @@ function komplainFormatTanggal(string $ts): string
             </table>
         </div>
 
-        <!-- Pagination -->
         <div class="komplain-pagination-wrap">
             <span>
                 Menampilkan
@@ -264,12 +252,10 @@ function komplainFormatTanggal(string $ts): string
             </div>
         </div>
 
-    </div><!-- /.komplain-table-card -->
+    </div>
 
-</div><!-- /.komplain-wrap -->
+</div>
 
-
-<!-- ══ MODAL DETAIL ════════════════════════════════════════ -->
 <div class="komplain-modal-overlay" id="komplainModalDetail">
     <div class="komplain-modal-box">
         <button class="komplain-modal-close" onclick="komplainCloseModal('komplainModalDetail')">&#215;</button>
@@ -360,7 +346,6 @@ function komplainFormatTanggal(string $ts): string
     </div>
 </div>
 
-<!-- ══ DATA PHP → JS ════════════════════════════════════════ -->
 <script>
 const _komplainData = <?= json_encode(
     array_values(KomplainRepository::getAll()),
@@ -399,7 +384,6 @@ function komplainOpenDetail(id) {
     document.getElementById('km-form-id').value         = r.id_support;
     document.getElementById('km-sel-status').value      = r.status ?? 'Menunggu';
 
-    // Tampilkan lampiran jika ada
     const attachRow = document.getElementById('km-attachment-row');
     if (r.attachment_url) {
         document.getElementById('km-attachment').href = r.attachment_url;

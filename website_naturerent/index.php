@@ -72,6 +72,9 @@ if ($page === 'users' && $userAction === 'add') {
     <?php if ($page === 'komplain'): ?>
         <link rel="stylesheet" href="assets/css/komplain_style.css">
     <?php endif; ?>
+    <?php if (($page ?? '') === 'komplain' && ($userAction ?? '') === 'detail'): ?>
+        <link rel="stylesheet" href="assets/css/komplain_detail_style.css">
+    <?php endif; ?>
     <?php if ($page === 'banner'): ?>
         <link rel="stylesheet" href="assets/css/banner_style.css">
     <?php endif; ?>
@@ -160,6 +163,9 @@ if ($page === 'users' && $userAction === 'add') {
     <?php endif; ?>
     <?php if ($page === 'komplain'): ?>
         <script src="assets/js/komplain_script.js"></script>
+    <?php endif; ?>
+    <?php if (($page ?? '') === 'komplain' && ($userAction ?? '') === 'detail'): ?>
+        <script src="assets/js/komplain_detail_script.js"></script>
     <?php endif; ?>
     <?php if ($page === 'banner'): ?>
         <script src="assets/js/banner_script.js?v=<?= filemtime(__DIR__ . '/assets/js/banner_script.js') ?>"></script>
