@@ -68,6 +68,16 @@
     background: #206f25;
 }
 
+.kategori-button-outline {
+    border: 1px solid #287d2d;
+    background: #fff;
+    color: #287d2d;
+}
+
+.kategori-button-outline:hover {
+    background: #f3fbf4;
+}
+
 .kategori-button svg,
 .kategori-icon-button svg,
 .kategori-page-button svg {
@@ -266,6 +276,225 @@
 .kategori-page-button.is-disabled {
     pointer-events: none;
     opacity: 0.5;
+}
+
+.kategori-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: rgba(33, 33, 33, 0.35);
+}
+
+.kategori-modal-overlay[hidden] {
+    display: none;
+}
+
+.kategori-modal {
+    width: min(390px, 100%);
+    overflow: hidden;
+    border-radius: 14px;
+    background: #fff;
+    color: #212121;
+}
+
+.kategori-modal-header {
+    min-height: 66px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 14px 14px 18px;
+    border-bottom: 1px solid #ded8cf;
+}
+
+.kategori-modal-header h2 {
+    margin: 0;
+    color: #212121;
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.kategori-modal-close {
+    width: 38px;
+    height: 38px;
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 38px;
+    border-radius: 50%;
+    background: #f0efed;
+    color: #757575;
+}
+
+.kategori-modal-close svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.kategori-modal-form {
+    display: flex;
+    flex-direction: column;
+    padding: 22px 29px 26px;
+}
+
+.kategori-modal-form label {
+    margin-bottom: 14px;
+    color: #212121;
+    font-size: 18px;
+    font-weight: 400;
+}
+
+.kategori-modal-form input {
+    width: 100%;
+    height: 45px;
+    padding: 0 15px;
+    border: 2px solid #287d2d;
+    border-radius: 6px;
+    outline: none;
+    color: #212121;
+    font: inherit;
+    font-size: 16px;
+}
+
+.kategori-modal-form input:focus {
+    box-shadow: 0 0 0 3px rgba(40, 125, 45, 0.12);
+}
+
+.kategori-modal-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin: 26px 0 0;
+    color: #212121;
+    font-size: 18px;
+    font-weight: 400;
+}
+
+.kategori-modal-meta p,
+.kategori-modal-error {
+    margin: 0;
+}
+
+.kategori-modal-error {
+    margin-top: 14px;
+    color: #d8242f;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.kategori-modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 33px;
+}
+
+.kategori-modal-cancel,
+.kategori-modal-submit {
+    min-width: 132px;
+    height: 43px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    font: inherit;
+    font-size: 18px;
+    font-weight: 400;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.kategori-modal-cancel {
+    border: 1px solid #287d2d;
+    background: #fff;
+    color: #287d2d;
+}
+
+.kategori-modal-submit {
+    border: 1px solid #287d2d;
+    background: #287d2d;
+    color: #fff;
+}
+
+.kategori-delete-modal {
+    width: min(393px, 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 49px 40px 48px;
+    border-radius: 18px;
+    background: #fff;
+    color: #212121;
+    text-align: center;
+}
+
+.kategori-delete-icon {
+    width: 113px;
+    height: 113px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 22px;
+    border-radius: 50%;
+    background: #d8242f;
+    color: #fff;
+}
+
+.kategori-delete-icon svg {
+    width: 52px;
+    height: 52px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.kategori-delete-modal h2 {
+    margin: 0 0 14px;
+    color: #212121;
+    font-size: 32px;
+    line-height: 1.2;
+    font-weight: 700;
+}
+
+.kategori-delete-modal p {
+    margin: 0;
+    color: #212121;
+    font-size: 23px;
+    line-height: 1.42;
+    font-weight: 400;
+}
+
+.kategori-delete-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 42px;
+}
+
+.kategori-delete-submit {
+    min-width: 143px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #d8242f;
+    border-radius: 8px;
+    background: #d8242f;
+    color: #fff;
+    font: inherit;
+    font-size: 18px;
+    font-weight: 500;
+    cursor: pointer;
 }
 
 @media (max-width: 980px) {

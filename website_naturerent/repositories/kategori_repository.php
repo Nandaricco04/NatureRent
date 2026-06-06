@@ -49,6 +49,36 @@ function getAdminCategoryProducts(): array
     return $result['ok'] && is_array($result['data']) ? $result['data'] : [];
 }
 
+function findAdminCategoryById(string $id): ?array
+{
+    foreach (getAdminCategories() as $category) {
+        if ((string) ($category['id_category'] ?? '') === $id) {
+            return $category;
+        }
+    }
+
+    return null;
+}
+
+function createAdminCategory(string $name): array
+{
+    return supabaseRequest('categories', 'POST', [
+        'name' => $name,
+    ]);
+}
+
+function updateAdminCategory(string $id, string $name): array
+{
+    return supabaseRequest('categories?id_category=eq.' . rawurlencode($id), 'PATCH', [
+        'name' => $name,
+    ]);
+}
+
+function deleteAdminCategory(string $id): array
+{
+    return supabaseRequest('categories?id_category=eq.' . rawurlencode($id), 'DELETE');
+}
+
 function fetchCategoryRows(): array
 {
     $result = supabaseRequest('categories?' . http_build_query([
