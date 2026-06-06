@@ -60,6 +60,9 @@ if ($page === 'users' && $userAction === 'add') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle) ?> - NatureRent</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <?php if ($page === 'dashboard'): ?>
+        <link rel="stylesheet" href="assets/css/dashboard_style.css">
+    <?php endif; ?>
     <?php if ($page === 'users'): ?>
         <link rel="stylesheet" href="assets/css/user_style.css">
     <?php endif; ?>
@@ -69,10 +72,10 @@ if ($page === 'users' && $userAction === 'add') {
     <?php if ($page === 'owners' && $userAction === 'detail'): ?>
         <link rel="stylesheet" href="assets/css/owner_verif_style.css">
     <?php endif; ?>
-    <?php if ($page === 'komplain'): ?>
+    <?php if ($page === 'komplain' && $userAction !== 'detail'): ?>
         <link rel="stylesheet" href="assets/css/komplain_style.css">
     <?php endif; ?>
-    <?php if (($page ?? '') === 'komplain' && ($userAction ?? '') === 'detail'): ?>
+    <?php if ($page === 'komplain' && $userAction === 'detail'): ?>
         <link rel="stylesheet" href="assets/css/komplain_detail_style.css">
     <?php endif; ?>
     <?php if ($page === 'banner'): ?>
@@ -161,11 +164,11 @@ if ($page === 'users' && $userAction === 'add') {
     <?php if ($page === 'owners' && $userAction === 'detail'): ?>
         <script src="assets/js/owner_verif_script.js"></script>
     <?php endif; ?>
-    <?php if ($page === 'komplain'): ?>
-        <script src="assets/js/komplain_script.js"></script>
+    <?php if ($page === 'komplain' && $userAction !== 'detail'): ?>
+        <script src="assets/js/komplain_script.js?v=<?= filemtime(__DIR__ . '/assets/js/komplain_script.js') ?>"></script>
     <?php endif; ?>
-    <?php if (($page ?? '') === 'komplain' && ($userAction ?? '') === 'detail'): ?>
-        <script src="assets/js/komplain_detail_script.js"></script>
+    <?php if ($page === 'komplain' && $userAction === 'detail'): ?>
+        <script src="assets/js/komplain_detail_script.js?v=<?= filemtime(__DIR__ . '/assets/js/komplain_detail_script.js') ?>"></script>
     <?php endif; ?>
     <?php if ($page === 'banner'): ?>
         <script src="assets/js/banner_script.js?v=<?= filemtime(__DIR__ . '/assets/js/banner_script.js') ?>"></script>
