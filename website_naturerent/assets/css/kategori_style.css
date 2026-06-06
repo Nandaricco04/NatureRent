@@ -1,0 +1,300 @@
+.kategori-card {
+    margin: 36px 32px 40px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.kategori-header {
+    min-height: 105px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 24px 34px;
+}
+
+.kategori-header h2 {
+    margin: 0;
+    color: #212121;
+    font-size: 24px;
+    line-height: 1.2;
+    font-weight: 600;
+}
+
+.kategori-produk-card {
+    margin-top: 29px;
+}
+
+.kategori-produk-header {
+    min-height: 141px;
+    display: flex;
+    align-items: center;
+    padding: 31px 37px;
+}
+
+.kategori-produk-header h2 {
+    margin: 0;
+    color: #212121;
+    font-size: 24px;
+    line-height: 1.2;
+    font-weight: 600;
+}
+
+.kategori-actions {
+    display: flex;
+    align-items: center;
+    gap: 27px;
+    flex-wrap: wrap;
+}
+
+.kategori-button {
+    min-height: 45px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 0 20px;
+    border-radius: 5px;
+    background: #287d2d;
+    color: #fff;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1;
+}
+
+.kategori-button:hover {
+    background: #206f25;
+}
+
+.kategori-button svg,
+.kategori-icon-button svg,
+.kategori-page-button svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.kategori-table-wrap {
+    overflow-x: auto;
+}
+
+.kategori-table {
+    width: 100%;
+    min-width: 850px;
+    border-collapse: collapse;
+}
+
+.kategori-table th,
+.kategori-table td {
+    padding: 0 34px;
+    text-align: left;
+    border-bottom: 1px solid #ded8cf;
+}
+
+.kategori-table th {
+    height: 67px;
+    background: #fafafa;
+    color: #212121;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.kategori-table td {
+    height: 93px;
+    color: #212121;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.kategori-table th:first-child,
+.kategori-table td:first-child {
+    width: 14%;
+    color: #212121;
+}
+
+.kategori-table th:nth-child(2),
+.kategori-table td:nth-child(2) {
+    width: 27%;
+}
+
+.kategori-table th:nth-child(3),
+.kategori-table td:nth-child(3) {
+    width: 21%;
+    color: #212121;
+}
+
+.kategori-table th:nth-child(4),
+.kategori-table td:nth-child(4) {
+    width: 22%;
+    color: #212121;
+}
+
+.kategori-table th:last-child,
+.kategori-table td:last-child {
+    width: 16%;
+}
+
+.kategori-produk-table th,
+.kategori-produk-table td {
+    padding-inline: 34px;
+}
+
+.kategori-produk-table th:first-child,
+.kategori-produk-table td:first-child {
+    width: 28%;
+    color: #212121;
+}
+
+.kategori-produk-table th:nth-child(2),
+.kategori-produk-table td:nth-child(2) {
+    width: 27%;
+    color: #212121;
+}
+
+.kategori-produk-table th:nth-child(3),
+.kategori-produk-table td:nth-child(3) {
+    width: 15%;
+    color: #212121;
+}
+
+.kategori-produk-table th:nth-child(4),
+.kategori-produk-table td:nth-child(4) {
+    width: 22%;
+    color: #212121;
+}
+
+.kategori-produk-table th:last-child,
+.kategori-produk-table td:last-child {
+    width: 8%;
+    color: #212121;
+}
+
+.kategori-empty {
+    height: 160px;
+    color: #212121;
+    text-align: center;
+}
+
+.kategori-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.kategori-icon-button {
+    width: 38px;
+    height: 38px;
+    display: inline-grid;
+    place-items: center;
+    border: 0;
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.kategori-icon-button.edit {
+    background: #ffb600;
+}
+
+.kategori-icon-button.delete {
+    background: #d8242f;
+}
+
+.kategori-icon-button:hover {
+    filter: brightness(0.94);
+}
+
+.kategori-icon-button svg {
+    width: 21px;
+    height: 21px;
+    stroke-width: 2.2;
+}
+
+.kategori-footer {
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 30px 16px 34px;
+    border-bottom: 1px solid #ded8cf;
+}
+
+.kategori-footer p {
+    margin: 0;
+    color: #212121;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.kategori-pagination {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.kategori-page-button {
+    width: 32px;
+    height: 32px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 4px;
+    background: #287d2d;
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.kategori-page-button svg {
+    width: 18px;
+    height: 18px;
+}
+
+.kategori-page-button:hover,
+.kategori-page-button.is-active {
+    background: #207126;
+}
+
+.kategori-page-button.is-disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+@media (max-width: 980px) {
+    .kategori-header,
+    .kategori-footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .kategori-actions {
+        gap: 12px;
+    }
+}
+
+@media (max-width: 640px) {
+    .kategori-card {
+        margin: 24px 16px 32px;
+    }
+
+    .kategori-header {
+        padding: 20px;
+    }
+
+    .kategori-button {
+        width: 100%;
+        font-size: 15px;
+    }
+
+    .kategori-actions {
+        width: 100%;
+    }
+}

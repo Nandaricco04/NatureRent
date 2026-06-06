@@ -50,6 +50,9 @@ if ($page === 'users' && $userAction === 'add') {
 } elseif ($page === 'informasi' && $userAction === 'edit') {
     $breadcrumbTitle .= ' / EditInformasi';
     $pageTitle = 'Edit Informasi';
+} elseif ($page === 'kategori' && $userAction === 'produk') {
+    $breadcrumbTitle .= ' / Lihat Produk';
+    $pageTitle = 'Lihat Produk';
 }
 
 ?>
@@ -89,6 +92,9 @@ if ($page === 'users' && $userAction === 'add') {
     <?php endif; ?>
     <?php if ($page === 'informasi'): ?>
     <link rel="stylesheet" href="assets/css/informasi_style.css">
+    <?php endif; ?>
+    <?php if ($page === 'kategori'): ?>
+        <link rel="stylesheet" href="assets/css/kategori_style.css">
     <?php endif; ?>
     <?php if ($page === 'pajak'): ?>
         <link rel="stylesheet" href="assets/css/user_style.css">
@@ -142,6 +148,8 @@ if ($page === 'users' && $userAction === 'add') {
                 $pageFile = __DIR__ . '/pages/informasi_add.php';
             } elseif ($page === 'informasi' && $userAction === 'edit') {
                 $pageFile = __DIR__ . '/pages/informasi_edit.php';
+            } elseif ($page === 'kategori' && $userAction === 'produk') {
+                $pageFile = __DIR__ . '/pages/kategori_produk.php';
             }
             
             if (is_file($pageFile)) {
