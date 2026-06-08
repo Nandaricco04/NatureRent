@@ -18,12 +18,14 @@ class UserProfilePage extends StatefulWidget {
     this.name,
     this.email,
     required this.onBack,
+    this.onNameChanged,
   });
 
   final dynamic userId;
   final String? name;
   final String? email;
   final VoidCallback onBack;
+  final ValueChanged<String>? onNameChanged;
 
   @override
   State<UserProfilePage> createState() => _UserProfilePageState();
@@ -183,7 +185,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
                             email: profileEmail,
                           ),
                         ),
-                      ).then((_) => _loadProfileData());
+                      ).then((result) {
+                        if (result is String && result.trim().isNotEmpty) {
+                          final newName = result.trim();
+                          setState(() => _profileName = newName);
+                          widget.onNameChanged?.call(newName);
+                        }
+                        _loadProfileData();
+                      });
                     },
                   ),
                   _ProfileMenuItem(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/app_alerts.dart';
 import 'owner_edit_alat_page.dart';
 import 'owner_iklan_alat_page.dart';
 import 'owner_tambah_alat_page.dart';
@@ -32,8 +33,9 @@ class _OwnerAlatPageState extends State<OwnerAlatPage> {
 
     return _products.where((product) {
       final name = (product['name'] ?? '').toString().toLowerCase();
-      final description =
-          (product['description'] ?? '').toString().toLowerCase();
+      final description = (product['description'] ?? '')
+          .toString()
+          .toLowerCase();
       final kapasitas = (product['kapasitas'] ?? '').toString().toLowerCase();
       return name.contains(query) ||
           description.contains(query) ||
@@ -100,10 +102,8 @@ class _OwnerAlatPageState extends State<OwnerAlatPage> {
     final saved = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
-        builder: (_) => OwnerEditAlatPage(
-          ownerId: widget.ownerId,
-          product: product,
-        ),
+        builder: (_) =>
+            OwnerEditAlatPage(ownerId: widget.ownerId, product: product),
       ),
     );
 
@@ -119,10 +119,8 @@ class _OwnerAlatPageState extends State<OwnerAlatPage> {
     final saved = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
-        builder: (_) => OwnerIklanAlatPage(
-          userId: widget.userId,
-          product: product,
-        ),
+        builder: (_) =>
+            OwnerIklanAlatPage(userId: widget.userId, product: product),
       ),
     );
 
@@ -148,9 +146,18 @@ class _OwnerAlatPageState extends State<OwnerAlatPage> {
   }
 
   void _show(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+    AppAlerts.showSnackBar(
+      context,
+      message: message,
+      type: _alertType(message),
     );
+  }
+
+  AppAlertType _alertType(String message) {
+    final lower = message.toLowerCase();
+    if (lower.contains('berhasil')) return AppAlertType.success;
+    if (lower.contains('gagal')) return AppAlertType.error;
+    return AppAlertType.warning;
   }
 
   @override
@@ -230,15 +237,17 @@ class _OwnerAlatPageState extends State<OwnerAlatPage> {
             else if (_filteredProducts.isEmpty)
               const OwnerNoSearchResult()
             else
-              ..._filteredProducts.map((product) => Padding(
-                    padding: const EdgeInsets.only(bottom: 14),
-                    child: OwnerToolCard(
-                      product: product,
-                      onAdvertise: () => _openAdvertiseProduct(product),
-                      onEdit: () => _openEditProduct(product),
-                      onDelete: () => _confirmDeleteProduct(product),
-                    ),
-                  )),
+              ..._filteredProducts.map(
+                (product) => Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: OwnerToolCard(
+                    product: product,
+                    onAdvertise: () => _openAdvertiseProduct(product),
+                    onEdit: () => _openEditProduct(product),
+                    onDelete: () => _confirmDeleteProduct(product),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

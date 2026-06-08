@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../widgets/app_alerts.dart';
 import 'services/user_detail_alat_service.dart';
 import 'user_main_page.dart';
 import 'widgets/user_detail_alat_widgets.dart';
@@ -103,8 +104,11 @@ class _UserDetailAlatState extends State<UserDetailAlat> {
 
       if (endDate == null) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Pilih tanggal kembali dulu')),
+        AppAlerts.showSnackBar(
+          context,
+          message: 'Pilih tanggal kembali dulu',
+          subtitle: 'Lengkapi tanggal sewa sebelum masuk keranjang.',
+          type: AppAlertType.warning,
         );
         return;
       }
@@ -122,8 +126,27 @@ class _UserDetailAlatState extends State<UserDetailAlat> {
       if (!mounted) return;
 
       if (!openCheckout) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Berhasil masuk keranjang')),
+        AppAlerts.showSnackBar(
+          context,
+          message: 'Berhasil masuk keranjang',
+          subtitle: 'Alat sudah siap dicek sebelum booking.',
+          type: AppAlertType.success,
+          actionLabel: 'Lihat',
+          onAction: () {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => UserMainPage(
+                  userId: session.userId,
+                  name: session.name,
+                  email: session.email,
+                  initialIndex: 1,
+                  initialCartId: session.cartId,
+                ),
+              ),
+            );
+          },
         );
         return;
       }
@@ -144,17 +167,22 @@ class _UserDetailAlatState extends State<UserDetailAlat> {
       );
     } on UserDetailCartException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      AppAlerts.showSnackBar(
         context,
-      ).showSnackBar(SnackBar(content: Text(e.message)));
+        message: e.message,
+        type: AppAlertType.warning,
+      );
     } catch (e) {
       debugPrint("ERROR TAMBAH KERANJANG: $e");
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
+      AppAlerts.showSnackBar(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        message: 'Gagal masuk keranjang',
+        subtitle: e.toString(),
+        type: AppAlertType.error,
+      );
     }
   }
 
@@ -188,12 +216,11 @@ class _UserDetailAlatState extends State<UserDetailAlat> {
         }
       } else {
         if (pickedDate.isBefore(normalizedStart)) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Tanggal kembali tidak boleh sebelum tanggal mulai',
-              ),
-            ),
+          AppAlerts.showSnackBar(
+            context,
+            message: 'Tanggal tidak sesuai',
+            subtitle: 'Tanggal kembali tidak boleh sebelum tanggal mulai.',
+            type: AppAlertType.warning,
           );
           return;
         }
@@ -470,10 +497,10 @@ class _UserDetailAlatState extends State<UserDetailAlat> {
                           final alamat = owner['alamat'] ?? '';
                           Clipboard.setData(ClipboardData(text: alamat));
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Alamat berhasil disalin'),
-                            ),
+                          AppAlerts.showSnackBar(
+                            context,
+                            message: 'Alamat berhasil disalin',
+                            type: AppAlertType.success,
                           );
                         },
                         icon: Icon(
@@ -666,8 +693,10 @@ class _UserDetailAlatState extends State<UserDetailAlat> {
                   qtyController.text = stock.toString();
                 });
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Stok hanya tersedia $stock')),
+                AppAlerts.showSnackBar(
+                  context,
+                  message: 'Stok hanya tersedia $stock',
+                  type: AppAlertType.warning,
                 );
               } else {
                 setState(() {
@@ -687,8 +716,10 @@ class _UserDetailAlatState extends State<UserDetailAlat> {
               qtyController.text = quantity.toString();
             });
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Stok hanya tersedia $stock')),
+            AppAlerts.showSnackBar(
+              context,
+              message: 'Stok hanya tersedia $stock',
+              type: AppAlertType.warning,
             );
           }
         }),

@@ -9,7 +9,8 @@ void main() async {
 
   await Supabase.initialize(
     url: 'https://anynenrhdtxbkfztmggd.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFueW5lbnJoZHR4YmtmenRtZ2dkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMTc4ODcsImV4cCI6MjA5Mjg5Mzg4N30.jfipTTqQ7ghXxkgPKdSNGTxelOMCvL-3Bqh27Qf5xXU',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFueW5lbnJoZHR4YmtmenRtZ2dkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMTc4ODcsImV4cCI6MjA5Mjg5Mzg4N30.jfipTTqQ7ghXxkgPKdSNGTxelOMCvL-3Bqh27Qf5xXU',
   );
 
   runApp(const MyApp());
@@ -24,7 +25,21 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'NatureRent',
       theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF297B2D),
+          primary: const Color(0xFF297B2D),
+          secondary: const Color(0xFFE8752A),
+          surface: Colors.white,
+        ),
         textTheme: GoogleFonts.poppinsTextTheme(),
+        textSelectionTheme: const TextSelectionThemeData(
+          cursorColor: Color(0xFF297B2D),
+          selectionColor: Color(0x33297B2D),
+          selectionHandleColor: Color(0xFF297B2D),
+        ),
+        progressIndicatorTheme: const ProgressIndicatorThemeData(
+          color: Color(0xFF297B2D),
+        ),
       ),
       home: const SplashPage(),
     );

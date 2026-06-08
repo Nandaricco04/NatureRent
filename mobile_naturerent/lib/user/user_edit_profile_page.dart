@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../auth/session_manager.dart';
+import '../widgets/app_alerts.dart';
 import 'services/user_profile_service.dart';
 import 'widgets/user_edit_profile_widgets.dart';
 
@@ -173,7 +175,15 @@ class _UserEditProfilePageState extends State<UserEditProfilePage> {
 
       if (!mounted) return;
       _show('Profil berhasil disimpan');
-      Navigator.pop(context);
+      final session = await SessionManager.loadSession();
+      await SessionManager.saveSession(
+        userId: widget.userId,
+        role: session?.role ?? 'user',
+        name: username,
+        email: _emailC.text.trim(),
+      );
+      if (!mounted) return;
+      Navigator.pop(context, username);
     } catch (e) {
       _show('Gagal menyimpan profil: $e');
     } finally {
@@ -190,9 +200,39 @@ class _UserEditProfilePageState extends State<UserEditProfilePage> {
   }
 
   void _show(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg)),
+    AppAlerts.showSnackBar(
+      context,
+      message: _alertTitle(msg),
+      subtitle: _alertSubtitle(msg),
+      type: _alertType(msg),
     );
+  }
+
+  AppAlertType _alertType(String message) {
+    final lower = message.toLowerCase();
+    if (lower.contains('berhasil')) return AppAlertType.success;
+    if (lower.contains('gagal')) return AppAlertType.error;
+    return AppAlertType.warning;
+  }
+
+  String _alertTitle(String message) {
+    if (message == 'Profil berhasil disimpan') {
+      return 'Profil berhasil disimpan';
+    }
+    if (message == 'Foto profil berhasil dipilih') {
+      return 'Foto profil diperbarui';
+    }
+    return message;
+  }
+
+  String? _alertSubtitle(String message) {
+    if (message == 'Profil berhasil disimpan') {
+      return 'Perubahan akun kamu sudah tersimpan.';
+    }
+    if (message == 'Foto profil berhasil dipilih') {
+      return 'Jangan lupa simpan perubahan profil.';
+    }
+    return null;
   }
 
   @override
@@ -233,8 +273,9 @@ class _UserEditProfilePageState extends State<UserEditProfilePage> {
                         width: 150,
                         height: 36,
                         child: OutlinedButton(
-                          onPressed:
-                              _uploadingPhoto ? null : _pickAndUploadPhoto,
+                          onPressed: _uploadingPhoto
+                              ? null
+                              : _pickAndUploadPhoto,
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFF212121),
                             disabledForegroundColor: const Color(0xFF212121),
@@ -328,7 +369,9 @@ class _UserEditProfilePageState extends State<UserEditProfilePage> {
                     SizedBox(
                       height: 46,
                       child: OutlinedButton(
-                        onPressed: _saving ? null : () => Navigator.pop(context),
+                        onPressed: _saving
+                            ? null
+                            : () => Navigator.pop(context),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: const Color(0xFF212121),
                           side: const BorderSide(color: Color(0xFF212121)),
@@ -364,6 +407,7 @@ class _UserEditProfilePageState extends State<UserEditProfilePage> {
       child: TextField(
         controller: controller,
         readOnly: readOnly,
+        cursorColor: _green,
         keyboardType: keyboardType,
         decoration: InputDecoration(
           hintText: hint,
@@ -381,6 +425,10 @@ class _UserEditProfilePageState extends State<UserEditProfilePage> {
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(9),
             borderSide: const BorderSide(color: Color(0xFFD8D3CE)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(9),
+            borderSide: const BorderSide(color: _green, width: 1.4),
           ),
         ),
       ),
@@ -414,6 +462,10 @@ class _UserEditProfilePageState extends State<UserEditProfilePage> {
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(9),
             borderSide: const BorderSide(color: Color(0xFFD8D3CE)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(9),
+            borderSide: const BorderSide(color: _green, width: 1.4),
           ),
         ),
       ),

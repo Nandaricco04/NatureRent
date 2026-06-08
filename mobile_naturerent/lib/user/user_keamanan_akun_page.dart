@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:bcrypt/bcrypt.dart';
 
+import '../widgets/app_alerts.dart';
+
 class UserKeamananAkunPage extends StatefulWidget {
   const UserKeamananAkunPage({super.key, required this.userId});
 
@@ -86,7 +88,21 @@ class _UserKeamananAkunPageState extends State<UserKeamananAkunPage> {
   }
 
   void _show(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    AppAlerts.showSnackBar(
+      context,
+      message: msg,
+      subtitle: msg == 'Password berhasil diperbarui'
+          ? 'Akun kamu sekarang memakai password baru.'
+          : null,
+      type: _alertType(msg),
+    );
+  }
+
+  AppAlertType _alertType(String message) {
+    final lower = message.toLowerCase();
+    if (lower.contains('berhasil')) return AppAlertType.success;
+    if (lower.contains('gagal')) return AppAlertType.error;
+    return AppAlertType.warning;
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/app_alerts.dart';
 import 'services/user_keranjang_service.dart';
 import 'widgets/user_keranjang_checkout_widgets.dart';
 import 'widgets/user_keranjang_selection_widgets.dart';
@@ -145,8 +146,13 @@ class _UserKeranjangPageState extends State<UserKeranjangPage> {
       });
       await _getKeranjang();
 
-      _showMessage('Checkout berhasil: ${transactionCodes.join(', ')}');
-      widget.onCheckoutComplete?.call();
+      if (!mounted) return;
+      final viewOrders = await AppAlerts.showBookingSuccessSheet(
+        context,
+        transactionCodes: transactionCodes,
+      );
+      if (!mounted) return;
+      if (viewOrders) widget.onCheckoutComplete?.call();
     } on UserKeranjangException catch (e) {
       if (!mounted) return;
       setState(() => isCheckingOut = false);
@@ -284,9 +290,42 @@ class _UserKeranjangPageState extends State<UserKeranjangPage> {
 
   void _showMessage(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(
+
+    AppAlerts.showSnackBar(
       context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+      message: _friendlyTitle(message),
+      subtitle: _friendlySubtitle(message),
+      type: _alertType(message),
+    );
+  }
+
+  AppAlertType _alertType(String message) {
+    final lower = message.toLowerCase();
+    if (lower.contains('berhasil')) return AppAlertType.success;
+    if (lower.contains('gagal') || lower.contains('error')) {
+      return AppAlertType.error;
+    }
+    return AppAlertType.warning;
+  }
+
+  String _friendlyTitle(String message) {
+    if (message == 'Bukti pembayaran berhasil diupload') {
+      return 'Bukti pembayaran terupload';
+    }
+    return message;
+  }
+
+  String? _friendlySubtitle(String message) {
+    if (message == 'Bukti pembayaran berhasil diupload') {
+      return 'Bukti akan dicek bersama detail booking kamu.';
+    }
+    if (message == 'Pilih metode pembayaran dulu') {
+      return 'Pilih salah satu metode sebelum melanjutkan booking.';
+    }
+    if (message == 'Upload bukti pembayaran QRIS dulu') {
+      return 'Bukti pembayaran dibutuhkan untuk metode QRIS.';
+    }
+    return null;
   }
 
   void _setCheckoutMode(bool value) {

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../widgets/app_alerts.dart';
 import 'widgets/owner_alat_form_widgets.dart';
 
 class OwnerTambahAlatPage extends StatefulWidget {
@@ -30,10 +31,6 @@ class _OwnerTambahAlatPageState extends State<OwnerTambahAlatPage> {
   int? _categoryId;
   String? _imageUrl;
   List<Map<String, dynamic>> _categories = [];
-
-  static const _green = Color(0xFF297B2D);
-  static const _background = Color(0xFFF5F2ED);
-  static const _text = Color(0xFF212121);
 
   @override
   void initState() {
@@ -213,9 +210,34 @@ class _OwnerTambahAlatPageState extends State<OwnerTambahAlatPage> {
   }
 
   void _show(String message) {
-    ScaffoldMessenger.of(
+    AppAlerts.showSnackBar(
       context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+      message: _alertTitle(message),
+      subtitle: _alertSubtitle(message),
+      type: _alertType(message),
+    );
+  }
+
+  AppAlertType _alertType(String message) {
+    final lower = message.toLowerCase();
+    if (lower.contains('berhasil')) return AppAlertType.success;
+    if (lower.contains('gagal')) return AppAlertType.error;
+    return AppAlertType.warning;
+  }
+
+  String _alertTitle(String message) {
+    if (message == 'Foto alat berhasil diupload') return 'Foto alat terupload';
+    return message;
+  }
+
+  String? _alertSubtitle(String message) {
+    if (message == 'Foto alat berhasil diupload') {
+      return 'Foto siap dipakai untuk alat baru.';
+    }
+    if (message == 'Alat berhasil disimpan') {
+      return 'Alat rental sudah masuk ke daftar toko.';
+    }
+    return null;
   }
 
   @override

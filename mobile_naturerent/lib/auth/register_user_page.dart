@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../widgets/app_alerts.dart';
 import 'login_page.dart';
 import 'services/user_registration_service.dart';
 import 'widgets/auth_brand_header.dart';
@@ -83,7 +84,18 @@ class _RegisterUserPageState extends State<RegisterUserPage> {
   }
 
   void _show(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    AppAlerts.showSnackBar(context, message: msg, type: _alertType(msg));
+  }
+
+  AppAlertType _alertType(String message) {
+    final lower = message.toLowerCase();
+    if (lower.contains('berhasil')) return AppAlertType.success;
+    if (lower.contains('gagal') ||
+        lower.contains('kesalahan') ||
+        lower.contains('tidak')) {
+      return AppAlertType.error;
+    }
+    return AppAlertType.warning;
   }
 
   bool _isNameValid(String value) {

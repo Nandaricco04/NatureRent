@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/app_alerts.dart';
 import 'services/owner_profile_service.dart';
 import 'widgets/owner_profile_form_widgets.dart';
 
@@ -167,7 +168,39 @@ class _UserEditTokoProfilePageState extends State<UserEditTokoProfilePage> {
   }
 
   void _show(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    AppAlerts.showSnackBar(
+      context,
+      message: _alertTitle(msg),
+      subtitle: _alertSubtitle(msg),
+      type: _alertType(msg),
+    );
+  }
+
+  AppAlertType _alertType(String message) {
+    final lower = message.toLowerCase();
+    if (lower.contains('berhasil')) return AppAlertType.success;
+    if (lower.contains('gagal')) return AppAlertType.error;
+    return AppAlertType.warning;
+  }
+
+  String _alertTitle(String message) {
+    if (message == 'Profil berhasil disimpan') {
+      return 'Profil toko berhasil disimpan';
+    }
+    if (message == 'Foto profil berhasil diperbarui') {
+      return 'Foto toko diperbarui';
+    }
+    return message;
+  }
+
+  String? _alertSubtitle(String message) {
+    if (message == 'Profil berhasil disimpan') {
+      return 'Informasi toko rental sudah tersimpan.';
+    }
+    if (message == 'Foto profil berhasil diperbarui') {
+      return 'Foto baru sudah masuk ke profil toko.';
+    }
+    return null;
   }
 
   @override

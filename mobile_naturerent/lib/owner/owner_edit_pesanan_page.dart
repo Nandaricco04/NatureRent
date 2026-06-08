@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../widgets/app_alerts.dart';
 import 'services/owner_edit_pesanan_service.dart';
 import 'widgets/owner_edit_pesanan_widgets.dart';
 
@@ -57,9 +58,23 @@ class _OwnerEditPesananPageState extends State<OwnerEditPesananPage> {
   }
 
   void _show(String message) {
-    ScaffoldMessenger.of(
+    AppAlerts.showSnackBar(
       context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+      message: message == 'Pesanan berhasil diperbarui'
+          ? 'Pesanan berhasil diperbarui'
+          : message,
+      subtitle: message == 'Pesanan berhasil diperbarui'
+          ? 'Status booking sudah disimpan.'
+          : null,
+      type: _alertType(message),
+    );
+  }
+
+  AppAlertType _alertType(String message) {
+    final lower = message.toLowerCase();
+    if (lower.contains('berhasil')) return AppAlertType.success;
+    if (lower.contains('gagal')) return AppAlertType.error;
+    return AppAlertType.warning;
   }
 
   @override

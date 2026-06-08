@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../widgets/app_alerts.dart';
+
 class UserKeranjangSelectionView extends StatelessWidget {
   const UserKeranjangSelectionView({
     super.key,
@@ -334,8 +336,11 @@ class _QuantityControls extends StatelessWidget {
               } else if (input > stock) {
                 newQty = stock;
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Stok hanya tersedia $stock')),
+                AppAlerts.showSnackBar(
+                  context,
+                  message: 'Stok hanya tersedia $stock',
+                  subtitle: 'Kurangi jumlah alat agar sesuai stok toko.',
+                  type: AppAlertType.warning,
                 );
               } else {
                 newQty = input;
@@ -354,8 +359,11 @@ class _QuantityControls extends StatelessWidget {
             if (quantity < stock) {
               onQuantityChanged(item, quantity + 1);
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Stok hanya tersedia $stock')),
+              AppAlerts.showSnackBar(
+                context,
+                message: 'Stok hanya tersedia $stock',
+                subtitle: 'Kurangi jumlah alat agar sesuai stok toko.',
+                type: AppAlertType.warning,
               );
             }
           },

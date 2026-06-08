@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+import '../widgets/app_alerts.dart';
 import 'services/user_bantuan_dukungan_service.dart';
 import 'widgets/user_bantuan_dukungan_widgets.dart';
 
@@ -159,9 +160,20 @@ class _UserBantuanDukunganPageState extends State<UserBantuanDukunganPage> {
   }
 
   void _show(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+    AppAlerts.showSnackBar(
+      context,
+      message: message,
+      type: _alertType(message),
     );
+  }
+
+  AppAlertType _alertType(String message) {
+    final lower = message.toLowerCase();
+    if (lower.contains('berhasil')) return AppAlertType.success;
+    if (lower.contains('gagal') || lower.contains('belum berhasil')) {
+      return AppAlertType.error;
+    }
+    return AppAlertType.warning;
   }
 
   @override

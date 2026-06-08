@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../widgets/app_alerts.dart';
 import 'owner_tambah_alat_page.dart';
 
 class OwnerEditAlatPage extends StatefulWidget {
@@ -58,7 +59,9 @@ class _OwnerEditAlatPageState extends State<OwnerEditAlatPage> {
 
   Future<void> _loadCategories() async {
     try {
-      final data = await supabase.from('categories').select('id_category, name');
+      final data = await supabase
+          .from('categories')
+          .select('id_category, name');
       if (!mounted) return;
       setState(() {
         _categories = List<Map<String, dynamic>>.from(data);
@@ -141,7 +144,9 @@ class _OwnerEditAlatPageState extends State<OwnerEditAlatPage> {
           'products/${widget.ownerId}/${DateTime.now().millisecondsSinceEpoch}_$cleanName';
       final contentType = ext == 'png' ? 'image/png' : 'image/jpeg';
 
-      await supabase.storage.from('product-images').uploadBinary(
+      await supabase.storage
+          .from('product-images')
+          .uploadBinary(
             path,
             bytes,
             fileOptions: FileOptions(contentType: contentType),
@@ -181,18 +186,21 @@ class _OwnerEditAlatPageState extends State<OwnerEditAlatPage> {
     setState(() => _saving = true);
 
     try {
-      await supabase.from('products').update({
-        'category_id': _categoryId,
-        'owner_id': widget.ownerId,
-        'name': name,
-        'description': description,
-        'price_per_day': price,
-        'stock': stock,
-        'image_url': _imageUrl,
-        'rating': widget.product['rating'] ?? 0,
-        'kapasitas': capacity,
-        'iklan': widget.product['iklan'] ?? false,
-      }).eq('id_product', widget.product['id_product']);
+      await supabase
+          .from('products')
+          .update({
+            'category_id': _categoryId,
+            'owner_id': widget.ownerId,
+            'name': name,
+            'description': description,
+            'price_per_day': price,
+            'stock': stock,
+            'image_url': _imageUrl,
+            'rating': widget.product['rating'] ?? 0,
+            'kapasitas': capacity,
+            'iklan': widget.product['iklan'] ?? false,
+          })
+          .eq('id_product', widget.product['id_product']);
 
       if (_oldImageUrl != null && _oldImageUrl != _imageUrl) {
         await _removeOldProductImage(_oldImageUrl);
@@ -210,9 +218,37 @@ class _OwnerEditAlatPageState extends State<OwnerEditAlatPage> {
   }
 
   void _show(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+    AppAlerts.showSnackBar(
+      context,
+      message: _alertTitle(message),
+      subtitle: _alertSubtitle(message),
+      type: _alertType(message),
     );
+  }
+
+  AppAlertType _alertType(String message) {
+    final lower = message.toLowerCase();
+    if (lower.contains('berhasil')) return AppAlertType.success;
+    if (lower.contains('gagal')) return AppAlertType.error;
+    return AppAlertType.warning;
+  }
+
+  String _alertTitle(String message) {
+    if (message == 'Alat berhasil diperbarui') {
+      return 'Alat berhasil diperbarui';
+    }
+    if (message == 'Foto alat berhasil diupload') return 'Foto alat terupload';
+    return message;
+  }
+
+  String? _alertSubtitle(String message) {
+    if (message == 'Alat berhasil diperbarui') {
+      return 'Perubahan alat rental sudah tersimpan.';
+    }
+    if (message == 'Foto alat berhasil diupload') {
+      return 'Foto baru siap dipakai untuk alat ini.';
+    }
+    return null;
   }
 
   Future<void> _removeOldProductImage(String? imageUrl) async {

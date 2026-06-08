@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:bcrypt/bcrypt.dart';
 import '../user/user_main_page.dart';
 import '../owner/owner_main_page.dart';
+import '../widgets/app_alerts.dart';
 import 'register_user_page.dart';
 import 'register_owner_page.dart';
 import 'session_manager.dart';
@@ -271,7 +272,19 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _show(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    AppAlerts.showSnackBar(context, message: msg, type: _alertType(msg));
+  }
+
+  AppAlertType _alertType(String message) {
+    final lower = message.toLowerCase();
+    if (lower.contains('berhasil')) return AppAlertType.success;
+    if (lower.contains('gagal') ||
+        lower.contains('kesalahan') ||
+        lower.contains('salah') ||
+        lower.contains('tidak')) {
+      return AppAlertType.error;
+    }
+    return AppAlertType.warning;
   }
 
   String _ownerStatusMessage(String status) {

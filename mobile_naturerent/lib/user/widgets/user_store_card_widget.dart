@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../widgets/app_alerts.dart';
+
 class UserStoreCardWidget extends StatelessWidget {
   const UserStoreCardWidget({
     super.key,
@@ -96,8 +98,10 @@ class UserStoreCardWidget extends StatelessWidget {
                   GestureDetector(
                     onTap: () {
                       Clipboard.setData(ClipboardData(text: telepon));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Nomor telepon disalin')),
+                      AppAlerts.showSnackBar(
+                        context,
+                        message: 'Nomor telepon disalin',
+                        type: AppAlertType.success,
                       );
                     },
                     child: _infoRow(Icons.phone_rounded, telepon),

@@ -13,7 +13,7 @@ class OwnerEditPesananService {
   }) async {
     final current = await _supabase
         .from('transaksi')
-        .select('id_transaksi, status_pesanan')
+        .select('id_transaksi, user_id, status_pesanan')
         .eq('id_transaksi', transactionId)
         .maybeSingle();
 
@@ -44,9 +44,32 @@ class OwnerEditPesananService {
 
     if (shouldReturnStock) {
       await _returnProductStock(transactionId);
+      await _createCompletedNotification(
+        userId: current['user_id'],
+        transactionId: transactionId,
+      );
     }
 
     return Map<String, dynamic>.from(updated);
+  }
+
+  Future<void> _createCompletedNotification({
+    required dynamic userId,
+    required dynamic transactionId,
+  }) async {
+    final transactionCode = _formatTransactionCode(transactionId);
+
+    await _supabase.rpc(
+      'create_notification',
+      params: {
+        'p_user_id': userId,
+        'p_transaksi_id': transactionId,
+        'p_type': 'order_completed',
+        'p_title': 'Pesanan Selesai',
+        'p_message':
+            'Pesanan $transactionCode sudah selesai. Kamu bisa memberi review untuk alat yang disewa.',
+      },
+    );
   }
 
   Future<void> _returnProductStock(dynamic transactionId) async {
@@ -86,5 +109,11 @@ class OwnerEditPesananService {
 
   String _normalizeStatus(String value) {
     return value.trim().toLowerCase().replaceAll(' ', '_');
+  }
+
+  String _formatTransactionCode(dynamic id) {
+    final number = _readInt(id);
+    if (number <= 0) return 'ID0000000';
+    return 'ID${number.toString().padLeft(7, '0')}';
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../widgets/app_alerts.dart';
 import 'services/user_pesanan_service.dart';
 import 'user_review_alat_page.dart';
 import 'widgets/user_pesanan_widgets.dart';
@@ -137,8 +138,11 @@ class _UserPesananPageState extends State<UserPesananPage> {
     }).toList();
 
     if (reviewableItems.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Semua alat sudah direview')),
+      AppAlerts.showSnackBar(
+        context,
+        message: 'Semua alat sudah direview',
+        subtitle: 'Tidak ada item lain yang perlu diberi ulasan.',
+        type: AppAlertType.info,
       );
       return;
     }
@@ -253,14 +257,20 @@ class _UserPesananPageState extends State<UserPesananPage> {
       setState(() {
         order['status_pesanan'] = updated['status_pesanan'];
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pesanan berhasil dibatalkan')),
+      AppAlerts.showSnackBar(
+        context,
+        message: 'Pesanan berhasil dibatalkan',
+        subtitle: 'Status pesanan sudah diperbarui.',
+        type: AppAlertType.success,
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      AppAlerts.showSnackBar(
         context,
-      ).showSnackBar(SnackBar(content: Text('Gagal membatalkan pesanan: $e')));
+        message: 'Gagal membatalkan pesanan',
+        subtitle: e.toString(),
+        type: AppAlertType.error,
+      );
     }
   }
 }

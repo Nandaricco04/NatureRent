@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../widgets/app_alerts.dart';
 import 'services/owner_pajak_service.dart';
 import 'widgets/owner_edit_pesanan_widgets.dart';
 import 'widgets/owner_pajak_widgets.dart';
@@ -78,9 +79,36 @@ class _OwnerPajakPageState extends State<OwnerPajakPage> {
   }
 
   void _show(String message) {
-    ScaffoldMessenger.of(
+    AppAlerts.showSnackBar(
       context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+      message: _alertTitle(message),
+      subtitle: _alertSubtitle(message),
+      type: _alertType(message),
+    );
+  }
+
+  AppAlertType _alertType(String message) {
+    final lower = message.toLowerCase();
+    if (lower.contains('berhasil')) return AppAlertType.success;
+    if (lower.contains('gagal')) return AppAlertType.error;
+    return AppAlertType.warning;
+  }
+
+  String _alertTitle(String message) {
+    if (message == 'Bukti pajak berhasil diupload') {
+      return 'Bukti pajak terupload';
+    }
+    return message;
+  }
+
+  String? _alertSubtitle(String message) {
+    if (message == 'Bukti pajak berhasil diupload') {
+      return 'Bukti siap dikirim untuk pembayaran pajak.';
+    }
+    if (message == 'Pajak berhasil dikirim') {
+      return 'Pembayaran pajak sudah masuk untuk dicek admin.';
+    }
+    return null;
   }
 
   @override

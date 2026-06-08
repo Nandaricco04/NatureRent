@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../widgets/app_alerts.dart';
 import 'services/user_profil_toko_service.dart';
 import 'widgets/user_store_card_widget.dart';
 import 'widgets/user_product_card_widget.dart';
@@ -45,9 +46,12 @@ class _UserProfilTokoPageState extends State<UserProfilTokoPage> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
-      ScaffoldMessenger.of(
+      AppAlerts.showSnackBar(
         context,
-      ).showSnackBar(SnackBar(content: Text('Gagal memuat profil toko: $e')));
+        message: 'Gagal memuat profil toko',
+        subtitle: e.toString(),
+        type: AppAlertType.error,
+      );
     }
   }
 

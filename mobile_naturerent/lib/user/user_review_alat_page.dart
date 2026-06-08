@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/app_alerts.dart';
 import 'services/user_review_alat_service.dart';
 import 'widgets/user_pesanan_widgets.dart';
 import 'widgets/user_review_alat_widgets.dart';
@@ -46,15 +47,21 @@ class _UserReviewAlatPageState extends State<UserReviewAlatPage> {
       );
 
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      AppAlerts.showSnackBar(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Review berhasil dikirim')));
+        message: 'Review berhasil dikirim',
+        subtitle: 'Terima kasih, ulasan kamu membantu penyewa lain.',
+        type: AppAlertType.success,
+      );
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      AppAlerts.showSnackBar(
         context,
-      ).showSnackBar(SnackBar(content: Text('Gagal mengirim review: $e')));
+        message: 'Gagal mengirim review',
+        subtitle: e.toString(),
+        type: AppAlertType.error,
+      );
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }

@@ -34,6 +34,7 @@ class _UserMainPageState extends State<UserMainPage> {
   late int _selectedIndex = widget.initialIndex;
   late dynamic _initialCartId = widget.initialCartId;
   late bool _openCartCheckout = widget.openCartCheckout;
+  late String? _userName = widget.name;
   String _homeLocation = 'Malang';
   String? _searchQuery;
   String _searchLocation = 'Malang';
@@ -108,7 +109,7 @@ class _UserMainPageState extends State<UserMainPage> {
       if (_searchQuery == null)
         UserHomePage(
           userId: widget.userId,
-          name: widget.name,
+          name: _userName,
           initialLocation: _homeLocation,
           onLocationChanged: (location) => _homeLocation = location,
           onOpenSearch: _openSearch,
@@ -139,9 +140,10 @@ class _UserMainPageState extends State<UserMainPage> {
 
       UserProfilePage(
         userId: widget.userId,
-        name: widget.name,
+        name: _userName,
         email: widget.email,
         onBack: () => _selectTab(0),
+        onNameChanged: (name) => setState(() => _userName = name),
       ),
     ];
 

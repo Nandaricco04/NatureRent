@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../widgets/app_alerts.dart';
 import 'services/owner_iklan_service.dart';
 import 'widgets/owner_iklan_widgets.dart';
 
@@ -110,9 +111,40 @@ class _OwnerIklanAlatPageState extends State<OwnerIklanAlatPage> {
   }
 
   void _show(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+    AppAlerts.showSnackBar(
+      context,
+      message: _alertTitle(message),
+      subtitle: _alertSubtitle(message),
+      type: _alertType(message),
     );
+  }
+
+  AppAlertType _alertType(String message) {
+    final lower = message.toLowerCase();
+    if (lower.contains('berhasil') || lower.contains('menunggu verifikasi')) {
+      return AppAlertType.success;
+    }
+    if (lower.contains('gagal') || lower.contains('tidak valid')) {
+      return AppAlertType.error;
+    }
+    return AppAlertType.warning;
+  }
+
+  String _alertTitle(String message) {
+    if (message == 'Bukti pembayaran berhasil diupload') {
+      return 'Bukti pembayaran terupload';
+    }
+    return message;
+  }
+
+  String? _alertSubtitle(String message) {
+    if (message == 'Bukti pembayaran berhasil diupload') {
+      return 'Bukti akan dicek untuk pengajuan iklan.';
+    }
+    if (message == 'Pengajuan iklan menunggu verifikasi') {
+      return 'Admin akan memeriksa pembayaran iklan kamu.';
+    }
+    return null;
   }
 
   @override
@@ -220,5 +252,4 @@ class _OwnerIklanAlatPageState extends State<OwnerIklanAlatPage> {
       ),
     );
   }
-
 }

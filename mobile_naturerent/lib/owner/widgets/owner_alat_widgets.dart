@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../widgets/app_alerts.dart';
+
 class OwnerEmptyProduct extends StatelessWidget {
   const OwnerEmptyProduct({super.key});
 
@@ -345,8 +347,11 @@ class _OwnerDeleteProductSheetState extends State<OwnerDeleteProductSheet> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _deleting = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal menghapus alat: $e')),
+      AppAlerts.showSnackBar(
+        context,
+        message: 'Gagal menghapus alat',
+        subtitle: e.toString(),
+        type: AppAlertType.error,
       );
     }
   }
@@ -390,7 +395,11 @@ class _OwnerDeleteProductSheetState extends State<OwnerDeleteProductSheet> {
           Text(
             'Data alat akan dihapus permanen dan tidak bisa dikembalikan',
             textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(color: _text, fontSize: 13, height: 1.45),
+            style: GoogleFonts.poppins(
+              color: _text,
+              fontSize: 13,
+              height: 1.45,
+            ),
           ),
           const SizedBox(height: 18),
           Container(
