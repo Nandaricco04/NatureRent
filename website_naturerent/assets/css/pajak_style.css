@@ -4,7 +4,7 @@
 
 .pajak-stat-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 14px;
     margin: 24px 32px 0;
 }
@@ -25,6 +25,25 @@
 .pajak-product-name {
     max-width: 270px;
     font-weight: 500;
+}
+
+.pajak-method-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: #e9f5ef;
+    color: #287d2d;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.pajak-method-pill i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
 }
 
 .pajak-status {
@@ -469,7 +488,7 @@
 
 @media (max-width: 1100px) {
     .pajak-stat-grid {
-        grid-template-columns: repeat(3, minmax(150px, 1fr));
+        grid-template-columns: repeat(2, minmax(150px, 1fr));
         gap: 18px;
     }
 }

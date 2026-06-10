@@ -197,6 +197,11 @@ function taxStatusClass(string $status): string
     };
 }
 
+function taxPaymentMethod(array $transaction): string
+{
+    return 'QRIS';
+}
+
 function taxProofUrl(array $transaction): string
 {
     return (string) ($transaction['bukti_pajak'] ?? '');

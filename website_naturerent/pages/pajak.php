@@ -35,11 +35,20 @@ $endNumber = min($offset + $perPage, $totalRows);
 
 $paidCount = count(array_filter($transactions, fn(array $row): bool => taxStatus($row) === 'sudah_dibayar'));
 $waitingCount = count(array_filter($transactions, fn(array $row): bool => taxStatus($row) === 'menunggu_verifikasi'));
+$unpaidCount = count(array_filter($transactions, fn(array $row): bool => taxStatus($row) === 'belum_dibayar'));
 $failedCount = count(array_filter($transactions, fn(array $row): bool => taxStatus($row) === 'gagal'));
 
 function taxPageUrl(int $page): string
 {
     return 'index.php?' . http_build_query(['page' => 'pajak', 'p' => $page]);
+}
+
+function taxPaginationRange(int $currentPage, int $totalPages): array
+{
+    $start = max(1, min($currentPage - 1, $totalPages - 2));
+    $end = min($totalPages, $start + 2);
+
+    return range($start, $end);
 }
 ?>
 <section class="pajak-page">
@@ -66,6 +75,18 @@ function taxPageUrl(int $page): string
             <p class="owner-stat-label">Menunggu Verifikasi</p>
             <p class="owner-stat-value"><?= $waitingCount ?></p>
             <p class="owner-stat-sub">Perlu ditinjau</p>
+        </article>
+
+        <article class="owner-stat-card">
+            <div class="owner-stat-top">
+                <div class="owner-stat-icon" style="background:#EAF1FF;">
+                    <iconify-icon icon="tabler:receipt-off" style="color:#285EA8;"></iconify-icon>
+                </div>
+                <span class="owner-stat-badge" style="background:#EAF1FF;color:#285EA8;">Belum Bayar</span>
+            </div>
+            <p class="owner-stat-label">Belum Bayar</p>
+            <p class="owner-stat-value"><?= $unpaidCount ?></p>
+            <p class="owner-stat-sub">Pajak belum dibayar</p>
         </article>
 
         <article class="owner-stat-card">
@@ -99,6 +120,7 @@ function taxPageUrl(int $page): string
                         <th>Toko</th>
                         <th>Nama Alat</th>
                         <th>Nominal</th>
+                        <th>Metode</th>
                         <th>Status</th>
                         <th>Aksi</th>
                     </tr>
@@ -106,7 +128,7 @@ function taxPageUrl(int $page): string
                 <tbody>
                     <?php if (empty($visibleTransactions)): ?>
                         <tr>
-                            <td class="empty-table" colspan="7">Data pajak belum tersedia.</td>
+                            <td class="empty-table" colspan="8">Data pajak belum tersedia.</td>
                         </tr>
                     <?php endif; ?>
 
@@ -121,6 +143,7 @@ function taxPageUrl(int $page): string
                             <td><?= htmlspecialchars(taxStoreName($transaction)) ?></td>
                             <td class="pajak-product-name"><?= htmlspecialchars(taxProductNames($transaction)) ?></td>
                             <td><?= htmlspecialchars(formatTaxMoney(taxAmount($transaction))) ?></td>
+                            <td><span class="pajak-method-pill"><i></i><?= htmlspecialchars(taxPaymentMethod($transaction)) ?></span></td>
                             <td>
                                 <span class="pajak-status <?= htmlspecialchars(taxStatusClass($status)) ?>">
                                     <?= htmlspecialchars(taxStatusLabel($status)) ?>
@@ -173,14 +196,14 @@ function taxPageUrl(int $page): string
                     </svg>
                 </a>
 
-                <?php for ($pageNumber = 1; $pageNumber <= $totalPages; $pageNumber++): ?>
+                <?php foreach (taxPaginationRange($currentPage, $totalPages) as $pageNumber): ?>
                     <a
                         class="page-button <?= $pageNumber === $currentPage ? 'is-active' : '' ?>"
                         href="<?= htmlspecialchars(taxPageUrl($pageNumber)) ?>"
                     >
                         <?= $pageNumber ?>
                     </a>
-                <?php endfor; ?>
+                <?php endforeach; ?>
 
                 <a
                     class="page-button <?= $currentPage >= $totalPages ? 'is-disabled' : '' ?>"

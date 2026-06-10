@@ -117,10 +117,10 @@ $statusOptions = [
                 </div>
 
                 <div class="pajak-info-field">
-                    <span>Metode</span>
+                    <span>Metode Pajak</span>
                     <div class="pajak-info-box">
-                        <iconify-icon icon="tabler:credit-card"></iconify-icon>
-                        <?= htmlspecialchars(strtoupper((string) ($transaction['payment_method'] ?? '-'))) ?>
+                        <iconify-icon icon="tabler:qrcode"></iconify-icon>
+                        <?= htmlspecialchars(taxPaymentMethod($transaction)) ?>
                     </div>
                 </div>
 
