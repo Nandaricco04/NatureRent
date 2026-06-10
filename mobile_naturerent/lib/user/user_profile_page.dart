@@ -97,6 +97,55 @@ class _UserProfilePageState extends State<UserProfilePage> {
     if (mounted) _loadUnreadNotifications();
   }
 
+  Future<void> _confirmLogout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          title: const Text(
+            'Keluar dari akun?',
+            style: TextStyle(fontWeight: FontWeight.w800),
+          ),
+          content: const Text(
+            'Kamu perlu login lagi untuk menggunakan akun ini.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Batal', style: TextStyle(color: _green)),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFD32F2F),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text(
+                'Ya, Keluar',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) return;
+
+    await SessionManager.clearSession();
+    await supabase.auth.signOut();
+    if (!mounted) return;
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final profileName = _profileName?.trim().isNotEmpty == true
@@ -248,19 +297,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 ],
               ),
               const SizedBox(height: 16),
-              _LogoutTile(
-                onTap: () async {
-                  await SessionManager.clearSession();
-                  await supabase.auth.signOut();
-                  if (!context.mounted) return;
-
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (_) => const LoginPage()),
-                    (route) => false,
-                  );
-                },
-              ),
+              _LogoutTile(onTap: _confirmLogout),
             ]),
           ),
         ),

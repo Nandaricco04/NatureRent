@@ -71,6 +71,46 @@ class _OwnerMainPageState extends State<OwnerMainPage> {
   }
 
   Future<void> _logout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          title: const Text(
+            'Keluar dari akun?',
+            style: TextStyle(fontWeight: FontWeight.w800),
+          ),
+          content: const Text(
+            'Kamu perlu login lagi untuk mengelola toko ini.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text(
+                'Batal',
+                style: TextStyle(color: Color(0xFF297B2D)),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFD32F2F),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text(
+                'Ya, Keluar',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) return;
+
     await SessionManager.clearSession();
     await Supabase.instance.client.auth.signOut();
     if (!mounted) return;
